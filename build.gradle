@@ -10,7 +10,12 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation('com.github.piotr-rusin:language-data') {
+        version {
+            branch = 'master'
+        }
+    }
 }
 
 compileKotlin {

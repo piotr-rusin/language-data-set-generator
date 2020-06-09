@@ -7,7 +7,6 @@ import com.github.piotr_rusin.language_data.value.Value
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import kotlin.random.Random
 
 class LanguageDataSetGeneratorTests {
     private fun prepareCodeMock(): Code {
@@ -42,6 +41,26 @@ class LanguageDataSetGeneratorTests {
             codes[1] to setOf(languages[2])
         )
         val actual = getFeatureValueLanguageSetMap(values)
+
+        Assertions.assertThat(actual).isEqualTo(expected)
+    }
+
+    @Test
+    fun `getProbabilitiesOfOccurenceOfDependentFeatures returns expected map`() {
+        val languages = (0..3).map { prepareLanguageMock() }
+        val codes = (0..2).map { prepareCodeMock() }
+        val languagesByCode = mapOf(
+            codes[0] to setOf(languages[0], languages[1], languages[2]),
+            codes[1] to setOf(languages[0], languages[1], languages[2]),
+            codes[2] to setOf(languages[3], languages[1])
+        )
+
+        val expected = mapOf(
+            codes[0] to mapOf(codes[0] to 1.0, codes[1] to 1.0, codes[2] to 1.0 / 3.0),
+            codes[1] to mapOf(codes[0] to 1.0, codes[1] to 1.0, codes[2] to 1.0 / 3.0),
+            codes[2] to mapOf(codes[0] to 0.5, codes[1] to 0.5, codes[2] to 1.0)
+        )
+        val actual = getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode)
 
         Assertions.assertThat(actual).isEqualTo(expected)
     }

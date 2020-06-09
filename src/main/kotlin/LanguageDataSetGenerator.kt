@@ -3,8 +3,9 @@ package com.github.piotr_rusin.language_data_set_generator
 
 import com.github.piotr_rusin.language_data.code.Code
 import com.github.piotr_rusin.language_data.language.Language
+import com.github.piotr_rusin.language_data.parameter.Parameter
 import com.github.piotr_rusin.language_data.value.Value
-
+import kotlin.random.Random
 
 fun getFeatureValueLanguageSetMap(values: List<Value>): Map<Code, Set<Language>> {
     val codeLanguageList: MutableMap<Code, MutableSet<Language>> = mutableMapOf()
@@ -38,4 +39,25 @@ fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<Code, Se
     }
 
     return probabilitiesOfCooccurrence
+}
+
+fun generateFeatureSet(probabilities: Map<Code, Map<Code, Double>>, random: Random): Set<Code> {
+    val minimalProbability = 0.1
+
+    val codePool = probabilities.keys.toMutableSet()
+    val selectedFeatures = mutableSetOf<Code>()
+    val coveredParameters = mutableSetOf<Parameter>()
+    while (codePool.isNotEmpty()) {
+        val newCode = codePool.random(random)
+        codePool.remove(newCode)
+
+        if ((newCode.parameter in coveredParameters) or (selectedFeatures.any { probabilities[it]?.get(newCode) ?: 0.0 < minimalProbability })) {
+            continue
+        }
+
+        selectedFeatures.add(newCode)
+        coveredParameters.add(newCode.parameter)
+    }
+
+    return selectedFeatures
 }

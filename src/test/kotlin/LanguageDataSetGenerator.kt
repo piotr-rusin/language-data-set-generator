@@ -1,7 +1,7 @@
 package com.github.piotr_rusin.language_data_set_generator
 
-import com.github.piotr_rusin.language_data.code.Code
-import com.github.piotr_rusin.language_data.value.Value
+import com.github.piotr_rusin.language_data.row.Code
+import com.github.piotr_rusin.language_data.row.Value
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito

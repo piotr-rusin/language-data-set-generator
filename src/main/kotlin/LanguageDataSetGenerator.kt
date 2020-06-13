@@ -2,23 +2,22 @@
 package com.github.piotr_rusin.language_data_set_generator
 
 import com.github.piotr_rusin.language_data.code.Code
-import com.github.piotr_rusin.language_data.language.Language
-import com.github.piotr_rusin.language_data.parameter.Parameter
 import com.github.piotr_rusin.language_data.value.Value
 import kotlin.random.Random
 
-fun getFeatureValueLanguageSetMap(values: List<Value>): Map<Code, Set<Language>> {
-    val codeLanguageList: MutableMap<Code, MutableSet<Language>> = mutableMapOf()
+fun getFeatureValueLanguageSetMap(values: List<Value>, codes:  Map<String, Code>): Map<Code, Set<String>> {
+    val codeLanguageList: MutableMap<Code, MutableSet<String>> = mutableMapOf()
     for (v in values) {
-        val languages = codeLanguageList.getOrDefault(v.code, mutableSetOf())
-        languages.add(v.language)
-        codeLanguageList[v.code] = languages
+        val code = codes[v.codeId] ?: error("Could not find a code for id ${v.codeId}")
+        val languages = codeLanguageList.getOrDefault(code, mutableSetOf())
+        languages.add(v.languageId)
+        codeLanguageList[code] = languages
     }
 
     return codeLanguageList
 }
 
-fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<Code, Set<Language>>): Map<Code, Map<Code, Double>> {
+fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<Code, Set<String>>): Map<Code, Map<Code, Double>> {
     val probabilitiesOfCooccurrence = mutableMapOf<Code, Map<Code, Double>>()
 
     for (first in languagesByCode.keys) {
@@ -46,17 +45,17 @@ fun generateFeatureSet(probabilities: Map<Code, Map<Code, Double>>, random: Rand
 
     val codePool = probabilities.keys.toMutableSet()
     val selectedFeatures = mutableSetOf<Code>()
-    val coveredParameters = mutableSetOf<Parameter>()
+    val coveredParameters = mutableSetOf<String>()
     while (codePool.isNotEmpty()) {
         val newCode = codePool.random(random)
         codePool.remove(newCode)
-
-        if ((newCode.parameter in coveredParameters) or (selectedFeatures.any { probabilities[it]?.get(newCode) ?: 0.0 < minimalProbability })) {
+        
+        if ((newCode.parameterId in coveredParameters) or (selectedFeatures.any { probabilities[it]?.get(newCode) ?: 0.0 < minimalProbability })) {
             continue
         }
 
         selectedFeatures.add(newCode)
-        coveredParameters.add(newCode.parameter)
+        coveredParameters.add(newCode.parameterId)
     }
 
     return selectedFeatures

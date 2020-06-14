@@ -1,8 +1,8 @@
 rootProject.name = 'language-data-set-generator'
 
 sourceControl {
-    gitRepository("https://github.com/piotr-rusin/language-data.git") {
-        producesModule("com.github.piotr-rusin:language-data")
+    gitRepository("https://github.com/rtwnt/language-data.git") {
+        producesModule("com.github.rtwnt:language-data")
     }
 }
 

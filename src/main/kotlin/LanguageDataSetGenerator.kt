@@ -1,8 +1,8 @@
 
-package com.github.piotr_rusin.language_data_set_generator
+package com.github.rtwnt.language_data_set_generator
 
-import com.github.piotr_rusin.language_data.row.Code
-import com.github.piotr_rusin.language_data.row.Value
+import com.github.rtwnt.language_data.row.Code
+import com.github.rtwnt.language_data.row.Value
 import kotlin.random.Random
 
 fun getFeatureValueLanguageSetMap(values: List<Value>, codes:  Map<String, Code>): Map<Code, Set<String>> {

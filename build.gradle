@@ -2,7 +2,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.72'
 }
 
-group 'com.github.piotr_rusin'
+group 'com.github.rtwnt'
 version '0.1-SNAPSHOT'
 
 repositories {
@@ -14,7 +14,7 @@ test { useJUnitPlatform() }
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-    implementation('com.github.piotr-rusin:language-data') {
+    implementation('com.github.rtwnt:language-data') {
         changing = true
         version {
             branch = 'master'

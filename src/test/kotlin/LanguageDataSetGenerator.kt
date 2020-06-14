@@ -49,7 +49,7 @@ class LanguageDataSetGeneratorTests {
     }
 
     @Test
-    fun `getFeatureValueLanguageSetMap throws error`() {
+    fun `getFeatureValueLanguageSetMap throws IllegalStateException when unable to find code for code id`() {
         val codeMap = mapOf(
                 "code1" to prepareCodeMock()
         )

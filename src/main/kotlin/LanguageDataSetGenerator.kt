@@ -24,14 +24,14 @@ fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<Code, Se
         val probabilities = mutableMapOf<Code, Double>()
         probabilitiesOfCooccurrence[first] = probabilities
         for (second in languagesByCode.keys) {
-            val firstLanguages = languagesByCode.getOrDefault(first, setOf())
-            val secondLanguages = languagesByCode.getOrDefault(second, setOf())
-            val commonLanguages = firstLanguages intersect secondLanguages
+            val langsWithFirstFeatureValue = languagesByCode.getOrDefault(first, setOf())
+            val langsWithSecondFeaturValue = languagesByCode.getOrDefault(second, setOf())
+            val langsWithBoth = langsWithFirstFeatureValue intersect langsWithSecondFeaturValue
 
-            val divisor = firstLanguages.size
+            val divisor = langsWithFirstFeatureValue.size
             var probability = 0.0
             if (divisor != 0) {
-                probability = commonLanguages.size.toDouble().div(divisor)
+                probability = langsWithBoth.size.toDouble().div(divisor)
             }
             probabilities[second] = probability
         }

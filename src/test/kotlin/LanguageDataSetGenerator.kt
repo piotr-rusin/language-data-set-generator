@@ -63,20 +63,16 @@ class LanguageDataSetGeneratorTests {
 
     @Test
     fun `generateFeatureSet generates expected set for given probabilities`() {
-        val codes = (0..3).map { prepareCodeMock() }
-        Mockito.`when`(codes[0].parameterId).thenReturn("param1")
-        Mockito.`when`(codes[1].parameterId).thenReturn("param1")
-        val probabilities = mapOf(
-                codes[0] to mapOf(codes[0] to 1.0, codes[1] to 0.0, codes[2] to 0.0, codes[3] to 0.4),
-                codes[1] to mapOf(codes[0] to 0.0, codes[1] to 1.0, codes[2] to 0.2, codes[3] to 0.5),
-                codes[2] to mapOf(codes[0] to 0.6, codes[1] to 1.0, codes[2] to 1.0, codes[3] to 0.1),
-                codes[3] to mapOf(codes[0] to 0.6, codes[1] to 1.0, codes[2] to 1.0, codes[3] to 1.0)
+        val values = listOf(
+                prepareValueMock("code1", "lang1", "param1"),
+                prepareValueMock("code2", "lang2", "param1"),
+                prepareValueMock("code3", "lang2", "param2")
         )
         val randomMock = Mockito.mock(Random::class.java)
         Mockito.`when`(randomMock.nextInt(Mockito.anyInt())).thenReturn(0)
 
-        val actual = generateFeatureSet(probabilities, randomMock)
-        val expected = setOf(codes[0], codes[3])
+        val actual = generateFeatureSet(values, randomMock)
+        val expected = mapOf<String, String>("param2" to "code3", "param1" to "code1")
 
         Assertions.assertThat(actual).isEqualTo(expected)
     }

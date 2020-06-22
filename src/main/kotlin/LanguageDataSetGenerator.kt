@@ -5,7 +5,7 @@ import com.github.rtwnt.language_data.row.Value
 import java.util.*
 import kotlin.random.Random
 
-fun getFeatureValueLanguageSetMap(values: List<Value>): Map<String, Set<String>> {
+fun getCodeIdToLanguageIdMap(values: List<Value>): Map<String, Set<String>> {
     return values.groupBy { it.codeId }
             .entries
             .associate { it.key to it.value.map { value -> value.languageId }.toSet() }
@@ -54,7 +54,7 @@ class FeatureSetGenerator(values: List<Value>) {
                 error("Language id can't be null or empty")
             }
         }
-        this.codeIdToLanguageId = getFeatureValueLanguageSetMap(values)
+        this.codeIdToLanguageId = getCodeIdToLanguageIdMap(values)
         this.probabilities = getProbabilitiesOfOccurenceOfDependentFeatures(this.codeIdToLanguageId)
         this.parameterIdToCodeIds = values.groupBy { it.parameterId }
                 .entries

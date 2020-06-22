@@ -31,7 +31,7 @@ class LanguageDataSetGeneratorTests {
     }
 
     @Test
-    fun `getFeatureValueLanguageSetMap returns expected map`() {
+    fun `getCodeIdToLanguageIdMap returns expected map`() {
         val values = listOf(
             prepareValueMock("code1", "lang1", "param1"),
             prepareValueMock("code1", "lang2", "param1"),
@@ -42,7 +42,7 @@ class LanguageDataSetGeneratorTests {
             "code1" to setOf("lang1", "lang2"),
             "code2" to setOf("lang3")
         )
-        val actual = getFeatureValueLanguageSetMap(values)
+        val actual = getCodeIdToLanguageIdMap(values)
 
         Assertions.assertThat(actual).isEqualTo(expected)
     }

@@ -41,6 +41,19 @@ class FeatureSetGenerator(values: List<Value>) {
     private var codeIdToLanguageId: Map<String, Set<String>>
 
     init {
+        values.forEach {
+            if (it.codeId.isNullOrBlank()) {
+                error("Code id can't be null or empty")
+            }
+
+            if (it.parameterId.isNullOrBlank()) {
+                error("Parameter id can't be null or empty")
+            }
+
+            if (it.languageId.isNullOrBlank()) {
+                error("Language id can't be null or empty")
+            }
+        }
         this.codeIdToLanguageId = getFeatureValueLanguageSetMap(values)
         this.probabilities = getProbabilitiesOfOccurenceOfDependentFeatures(this.codeIdToLanguageId)
         this.parameterIdToCodeIds = values.groupBy { it.parameterId }

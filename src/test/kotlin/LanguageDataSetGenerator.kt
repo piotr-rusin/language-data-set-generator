@@ -4,7 +4,11 @@ import com.github.rtwnt.language_data.row.Code
 import com.github.rtwnt.language_data.row.Value
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito
+import java.util.stream.Stream
 import kotlin.random.Random
 
 class LanguageDataSetGeneratorTests {
@@ -18,7 +22,7 @@ class LanguageDataSetGeneratorTests {
         return code
     }
 
-    private fun prepareValueMock(codeId: String, languageId: String, parameterId: String): Value {
+    private fun prepareValueMock(codeId: String?, languageId: String?, parameterId: String?): Value {
         val value = Mockito.mock(Value::class.java)
         Mockito.`when`(value.codeId).thenReturn(codeId)
         Mockito.`when`(value.languageId).thenReturn(languageId)
@@ -77,5 +81,34 @@ class LanguageDataSetGeneratorTests {
         val expected = mapOf<String, String>("param2" to "code3", "param1" to "code1")
 
         Assertions.assertThat(actual).isEqualTo(expected)
+    }
+
+    companion object {
+        @JvmStatic
+        private fun provideCodeLangAndParamIdsFor_generateFeatureSet_nullOrBlankTest(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(null, "lang1", "param1"),
+                Arguments.of("", "lang1", "param1"),
+                Arguments.of("  ", "lang1", "param1"),
+                Arguments.of("code1", null, "param1"),
+                Arguments.of("code1", "", "param1"),
+                Arguments.of("code1", "  ", "param1"),
+                Arguments.of("code1", "lang1", null),
+                Arguments.of("code1", "lang1", ""),
+                Arguments.of("code1", "lang1", "   ")
+            )
+        }
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("provideCodeLangAndParamIdsFor_generateFeatureSet_nullOrBlankTest")
+    fun `FeatureSetGenerator constructor throws IllegalStateException for blank or null code, language or parameter ids in a Value instance`(
+        codeId: String?, languageId: String?, parameterId: String?) {
+        val values = listOf(
+            prepareValueMock(codeId, languageId, parameterId)
+        )
+
+        Assertions.assertThatThrownBy { FeatureSetGenerator(values) }.isInstanceOf(IllegalStateException::class.java)
     }
 }

@@ -5,7 +5,6 @@ import com.github.rtwnt.language_data.row.Value
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import java.lang.IllegalStateException
 import kotlin.random.Random
 
 class LanguageDataSetGeneratorTests {
@@ -19,46 +18,29 @@ class LanguageDataSetGeneratorTests {
         return code
     }
 
-    private fun prepareValueMock(codeId: String, languageId: String): Value {
+    private fun prepareValueMock(codeId: String, languageId: String, parameterId: String): Value {
         val value = Mockito.mock(Value::class.java)
         Mockito.`when`(value.codeId).thenReturn(codeId)
         Mockito.`when`(value.languageId).thenReturn(languageId)
+        Mockito.`when`(value.parameterId).thenReturn(parameterId)
         return value
     }
 
     @Test
     fun `getFeatureValueLanguageSetMap returns expected map`() {
-        val codes = (0..1).map { prepareCodeMock() }
-        val codeMap = mapOf(
-            "code1" to codes[0],
-            "code2" to codes[1]
-         )
         val values = listOf(
-            prepareValueMock("code1", "lang1"),
-            prepareValueMock("code1", "lang2"),
-            prepareValueMock("code2", "lang3")
+            prepareValueMock("code1", "lang1", "param1"),
+            prepareValueMock("code1", "lang2", "param1"),
+            prepareValueMock("code2", "lang3", "param1")
         )
 
         val expected = mapOf(
-            codes[0] to setOf("lang1", "lang2"),
-            codes[1] to setOf("lang3")
+            "code1" to setOf("lang1", "lang2"),
+            "code2" to setOf("lang3")
         )
-        val actual = getFeatureValueLanguageSetMap(values, codeMap)
+        val actual = getFeatureValueLanguageSetMap(values)
 
         Assertions.assertThat(actual).isEqualTo(expected)
-    }
-
-    @Test
-    fun `getFeatureValueLanguageSetMap throws IllegalStateException when unable to find code for code id`() {
-        val codeMap = mapOf(
-                "code1" to prepareCodeMock()
-        )
-        val values = listOf(
-                prepareValueMock("code3", "lang1")
-        )
-
-        Assertions.assertThatThrownBy { getFeatureValueLanguageSetMap(values, codeMap) }
-                .isInstanceOf(IllegalStateException::class.java)
     }
 
     @Test

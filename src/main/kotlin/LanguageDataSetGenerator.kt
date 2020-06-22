@@ -5,16 +5,10 @@ import com.github.rtwnt.language_data.row.Code
 import com.github.rtwnt.language_data.row.Value
 import kotlin.random.Random
 
-fun getFeatureValueLanguageSetMap(values: List<Value>, codes:  Map<String, Code>): Map<Code, Set<String>> {
-    val codeLanguageList: MutableMap<Code, MutableSet<String>> = mutableMapOf()
-    for (v in values) {
-        val code = codes[v.codeId] ?: error("Could not find a code for id ${v.codeId}")
-        val languages = codeLanguageList.getOrDefault(code, mutableSetOf())
-        languages.add(v.languageId)
-        codeLanguageList[code] = languages
-    }
-
-    return codeLanguageList
+fun getFeatureValueLanguageSetMap(values: List<Value>): Map<String, Set<String>> {
+    return values.groupBy { it.codeId }
+            .entries
+            .associate { it.key to it.value.map { value -> value.languageId }.toSet() }
 }
 
 fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<Code, Set<String>>): Map<Code, Map<Code, Double>> {

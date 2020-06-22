@@ -34,41 +34,52 @@ fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<String, 
     return probabilitiesOfCooccurrence
 }
 
-fun generateFeatureSet(values: List<Value>, random: Random): Map<String, String> {
-    val codeIdToLanguageId = getFeatureValueLanguageSetMap(values)
-    val probabilities = getProbabilitiesOfOccurenceOfDependentFeatures(codeIdToLanguageId)
-    val parameterIdToCodeIds = values.groupBy { it.parameterId }.entries.associate { it.key to it.value.map { value -> value.codeId } }
-    val parameterIdsByCount = LinkedList(
-            values.groupBy { it.parameterId }
-                    .entries
-                    .map { it.key to it.value.map { value -> value.languageId }.size }
-                    .sortedBy { it.second }
-                    .map { it.first }
-    )
-    val paramIdToSelectedValueId = mutableMapOf<String, String>()
-    val parameterIdToValueIdListForRandomChoice = mutableMapOf<String, List<String>>()
-    while(parameterIdsByCount.isNotEmpty()) {
-        val nextParamId = parameterIdsByCount.pop()
-        // probably impossible to happen due to all parameter and parameter value ids ultimately coming from data provided in values
-        val nextParamValueIds = parameterIdToCodeIds[nextParamId] ?: error("Couldn't find value ids for parameter id $nextParamId")
-        val availableValues = nextParamValueIds.filter { codeId ->
-            paramIdToSelectedValueId.any {
-                // same as above
-                val prob = probabilities[it.value]?.get(codeId) ?: error("Couldn't find probability for $codeId and ${it.value}")
-                prob in 0.0..1.0
+class FeatureSetGenerator(values: List<Value>) {
+    private var parameterIdsByCount: List<String>
+    private var parameterIdToCodeIds: Map<String, List<String>>
+    private var probabilities: Map<String, Map<String, Double>>
+    private var codeIdToLanguageId: Map<String, Set<String>>
+
+    init {
+        this.codeIdToLanguageId = getFeatureValueLanguageSetMap(values)
+        this.probabilities = getProbabilitiesOfOccurenceOfDependentFeatures(this.codeIdToLanguageId)
+        this.parameterIdToCodeIds = values.groupBy { it.parameterId }
+                .entries
+                .associate { it.key to it.value.map { value -> value.codeId } }
+        this.parameterIdsByCount = values.groupBy { it.parameterId }
+                .entries
+                .map { it.key to it.value.map { value -> value.languageId }.size }
+                .sortedBy { it.second }
+                .map { it.first }
+    }
+
+    fun generateFeatureSet(random: Random): Map<String, String> {
+        val parameterIdPool = LinkedList(this.parameterIdsByCount)
+        val paramIdToSelectedValueId = mutableMapOf<String, String>()
+        val parameterIdToValueIdListForRandomChoice = mutableMapOf<String, List<String>>()
+        while(parameterIdPool.isNotEmpty()) {
+            val nextParamId = parameterIdPool.pop()
+            // probably impossible to happen due to all parameter and parameter value ids ultimately coming from data provided in values
+            val nextParamValueIds = parameterIdToCodeIds[nextParamId] ?: error("Couldn't find value ids for parameter id $nextParamId")
+            val availableValues = nextParamValueIds.filter { codeId ->
+                paramIdToSelectedValueId.any {
+                    // same as above
+                    val prob = probabilities[it.value]?.get(codeId) ?: error("Couldn't find probability for $codeId and ${it.value}")
+                    prob in 0.0..1.0
+                }
+            }
+            var nextValue: String? = null
+            if (availableValues.isNotEmpty()) {
+                nextValue = availableValues.random(random)
+            }
+            if (nextValue == null) {
+                parameterIdToValueIdListForRandomChoice[nextParamId] = nextParamValueIds
+            } else {
+                paramIdToSelectedValueId[nextParamId] = nextValue
             }
         }
-        var nextValue: String? = null
-        if (availableValues.isNotEmpty()) {
-            nextValue = availableValues.random(random)
-        }
-        if (nextValue == null) {
-            parameterIdToValueIdListForRandomChoice[nextParamId] = nextParamValueIds
-        } else {
-            paramIdToSelectedValueId[nextParamId] = nextValue
-        }
-    }
-    parameterIdToValueIdListForRandomChoice.forEach { paramIdToSelectedValueId[it.key] = it.value.random(random) }
+        parameterIdToValueIdListForRandomChoice.forEach { paramIdToSelectedValueId[it.key] = it.value.random(random) }
 
-    return paramIdToSelectedValueId
+        return paramIdToSelectedValueId
+    }
 }

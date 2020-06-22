@@ -45,17 +45,16 @@ class LanguageDataSetGeneratorTests {
 
     @Test
     fun `getProbabilitiesOfOccurenceOfDependentFeatures returns expected map`() {
-        val codes = (0..2).map { prepareCodeMock() }
         val languagesByCode = mapOf(
-            codes[0] to setOf("lang1", "lang2", "lang3"),
-            codes[1] to setOf("lang1", "lang2", "lang3"),
-            codes[2] to setOf("lang4", "lang2")
+            "code1" to setOf("lang1", "lang2", "lang3"),
+            "code2" to setOf("lang1", "lang2", "lang3"),
+            "code3" to setOf("lang4", "lang2")
         )
 
         val expected = mapOf(
-            codes[0] to mapOf(codes[0] to 1.0, codes[1] to 1.0, codes[2] to 1.0 / 3.0),
-            codes[1] to mapOf(codes[0] to 1.0, codes[1] to 1.0, codes[2] to 1.0 / 3.0),
-            codes[2] to mapOf(codes[0] to 0.5, codes[1] to 0.5, codes[2] to 1.0)
+            "code1" to mapOf("code1" to 1.0, "code2" to 1.0, "code3" to 1.0 / 3.0),
+            "code2" to mapOf("code1" to 1.0, "code2" to 1.0, "code3" to 1.0 / 3.0),
+            "code3" to mapOf("code1" to 0.5, "code2" to 0.5, "code3" to 1.0)
         )
         val actual = getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode)
 

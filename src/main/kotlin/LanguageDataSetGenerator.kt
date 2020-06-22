@@ -1,7 +1,6 @@
 
 package com.github.rtwnt.language_data_set_generator
 
-import com.github.rtwnt.language_data.row.Code
 import com.github.rtwnt.language_data.row.Value
 import kotlin.random.Random
 
@@ -11,11 +10,11 @@ fun getFeatureValueLanguageSetMap(values: List<Value>): Map<String, Set<String>>
             .associate { it.key to it.value.map { value -> value.languageId }.toSet() }
 }
 
-fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<Code, Set<String>>): Map<Code, Map<Code, Double>> {
-    val probabilitiesOfCooccurrence = mutableMapOf<Code, Map<Code, Double>>()
+fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<String, Set<String>>): Map<String, Map<String, Double>> {
+    val probabilitiesOfCooccurrence = mutableMapOf<String, Map<String, Double>>()
 
     for (first in languagesByCode.keys) {
-        val probabilities = mutableMapOf<Code, Double>()
+        val probabilities = mutableMapOf<String, Double>()
         probabilitiesOfCooccurrence[first] = probabilities
         for (second in languagesByCode.keys) {
             val langsWithFirstFeatureValue = languagesByCode.getOrDefault(first, setOf())

@@ -2,7 +2,6 @@
 package com.github.rtwnt.language_data_set_generator
 
 import com.github.rtwnt.language_data.row.Value
-import java.util.*
 import kotlin.random.Random
 
 fun getCodeIdToLanguageIdMap(values: List<Value>): Map<String, Set<String>> {
@@ -62,22 +61,20 @@ class FeatureSetGenerator(values: List<Value>) {
         this.parameterIdsByCount = values.groupBy { it.parameterId }
                 .entries
                 .map { it.key to it.value.map { value -> value.languageId }.size }
-                .sortedBy { it.second }
+                .sortedByDescending { it.second }
                 .map { it.first }
     }
 
     fun generateFeatureSet(random: Random): Map<String, String> {
-        val parameterIdPool = LinkedList(this.parameterIdsByCount)
         val paramIdToSelectedValueId = mutableMapOf<String, String>()
         val parameterIdToValueIdListForRandomChoice = mutableMapOf<String, List<String>>()
-        while(parameterIdPool.isNotEmpty()) {
-            val nextParamId = parameterIdPool.pop()
+        this.parameterIdsByCount.forEach {
             // probably impossible to happen due to all parameter and parameter value ids ultimately coming from data provided in values
-            val nextParamValueIds = parameterIdToCodeIds[nextParamId] ?: error("Couldn't find value ids for parameter id $nextParamId")
+            val nextParamValueIds = parameterIdToCodeIds[it] ?: error("Couldn't find value ids for parameter id $it")
             val availableValues = nextParamValueIds.filter { codeId ->
-                paramIdToSelectedValueId.any {
+                paramIdToSelectedValueId.any {entry ->
                     // same as above
-                    val prob = probabilities[it.value]?.get(codeId) ?: error("Couldn't find probability for $codeId and ${it.value}")
+                    val prob = probabilities[entry.value]?.get(codeId) ?: error("Couldn't find probability for $codeId and ${entry.value}")
                     prob in 0.0..1.0
                 }
             }
@@ -86,9 +83,9 @@ class FeatureSetGenerator(values: List<Value>) {
                 nextValue = availableValues.random(random)
             }
             if (nextValue == null) {
-                parameterIdToValueIdListForRandomChoice[nextParamId] = nextParamValueIds
+                parameterIdToValueIdListForRandomChoice[it] = nextParamValueIds
             } else {
-                paramIdToSelectedValueId[nextParamId] = nextValue
+                paramIdToSelectedValueId[it] = nextValue
             }
         }
         parameterIdToValueIdListForRandomChoice.forEach { paramIdToSelectedValueId[it.key] = it.value.random(random) }

@@ -37,7 +37,7 @@ data class FeatureSetGenerationConfig(val preselectedValueIds: Set<String>, val 
 
 class FeatureSetGenerator(values: List<Value>) {
     private var parameterIdsByCount: List<String>
-    private var parameterIdToCodeIds: Map<String, List<String>>
+    private var parameterIdToCodeIds: Map<String, Set<String>>
     private var probabilities: Map<String, Map<String, Double>>
     private var codeIdToLanguageId: Map<String, Set<String>>
 
@@ -59,7 +59,7 @@ class FeatureSetGenerator(values: List<Value>) {
         this.probabilities = getProbabilitiesOfOccurenceOfDependentFeatures(this.codeIdToLanguageId)
         this.parameterIdToCodeIds = values.groupBy { it.parameterId }
                 .entries
-                .associate { it.key to it.value.map { value -> value.codeId } }
+                .associate { it.key to it.value.map { value -> value.codeId }.toSet() }
         this.parameterIdsByCount = values.groupBy { it.parameterId }
                 .entries
                 .map { it.key to it.value.map { value -> value.languageId }.size }

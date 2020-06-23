@@ -11,15 +11,15 @@ fun getCodeIdToLanguageIdMap(values: List<Value>): Map<String, Set<String>> {
             .associate { it.key to it.value.map { value -> value.languageId }.toSet() }
 }
 
-fun getProbabilitiesOfOccurenceOfDependentFeatures(languagesByCode: Map<String, Set<String>>): Map<String, Map<String, Double>> {
+fun getProbabilitiesOfOccurenceOfDependentFeatures(codeIdToLanguageIdMap: Map<String, Set<String>>): Map<String, Map<String, Double>> {
     val probabilitiesOfCooccurrence = mutableMapOf<String, Map<String, Double>>()
 
-    for (first in languagesByCode.keys) {
+    for (first in codeIdToLanguageIdMap.keys) {
         val probabilities = mutableMapOf<String, Double>()
         probabilitiesOfCooccurrence[first] = probabilities
-        for (second in languagesByCode.keys) {
-            val langsWithFirstFeatureValue = languagesByCode.getOrDefault(first, setOf())
-            val langsWithSecondFeaturValue = languagesByCode.getOrDefault(second, setOf())
+        for (second in codeIdToLanguageIdMap.keys) {
+            val langsWithFirstFeatureValue = codeIdToLanguageIdMap.getOrDefault(first, setOf())
+            val langsWithSecondFeaturValue = codeIdToLanguageIdMap.getOrDefault(second, setOf())
             val langsWithBoth = langsWithFirstFeatureValue intersect langsWithSecondFeaturValue
 
             val divisor = langsWithFirstFeatureValue.size

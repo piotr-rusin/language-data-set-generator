@@ -65,8 +65,9 @@ class LanguageDataSetGeneratorTests {
         Assertions.assertThat(actual).isEqualTo(expected)
     }
 
-    @Test
-    fun `generateFeatureSet generates expected set for given probabilities`() {
+    @ParameterizedTest
+    @MethodSource("provideInvalidConfig")
+    fun `generateFeatureSet throws IllegalStateException for given config`(config: FeatureSetGenerationConfig) {
         val values = listOf(
                 prepareValueMock("code1", "lang1", "param1"),
                 prepareValueMock("code2", "lang2", "param1"),
@@ -76,9 +77,24 @@ class LanguageDataSetGeneratorTests {
         Mockito.`when`(randomMock.nextInt(Mockito.anyInt())).thenReturn(0)
 
         val generator = FeatureSetGenerator(values)
+        Assertions.assertThatThrownBy { generator.generateFeatureSet(config, randomMock) }.isInstanceOf(IllegalStateException::class.java)
+    }
 
-        val actual = generator.generateFeatureSet(randomMock)
-        val expected = setOf("code3", "code1")
+    @ParameterizedTest
+    @MethodSource("provideValidConfigAndExpectedResult")
+    fun `generateFeatureSet generates expected set for given probabilities`(config: FeatureSetGenerationConfig, expected: Set<String>) {
+        val values = listOf(
+                prepareValueMock("code1", "lang1", "param1"),
+                prepareValueMock("code2", "lang2", "param1"),
+                prepareValueMock("code3", "lang2", "param2"),
+                prepareValueMock("code3", "lang1", "param2")
+        )
+        val randomMock = Mockito.mock(Random::class.java)
+        Mockito.`when`(randomMock.nextInt(Mockito.anyInt())).thenReturn(0)
+
+        val generator = FeatureSetGenerator(values)
+
+        val actual = generator.generateFeatureSet(config, randomMock)
 
         Assertions.assertThat(actual).isEqualTo(expected)
     }
@@ -87,15 +103,47 @@ class LanguageDataSetGeneratorTests {
         @JvmStatic
         private fun provideCodeLangAndParamIdsFor_generateFeatureSet_nullOrBlankTest(): Stream<Arguments> {
             return Stream.of(
-                Arguments.of(null, "lang1", "param1"),
-                Arguments.of("", "lang1", "param1"),
-                Arguments.of("  ", "lang1", "param1"),
-                Arguments.of("code1", null, "param1"),
-                Arguments.of("code1", "", "param1"),
-                Arguments.of("code1", "  ", "param1"),
-                Arguments.of("code1", "lang1", null),
-                Arguments.of("code1", "lang1", ""),
-                Arguments.of("code1", "lang1", "   ")
+                    Arguments.of(null, "lang1", "param1"),
+                    Arguments.of("", "lang1", "param1"),
+                    Arguments.of("  ", "lang1", "param1"),
+                    Arguments.of("code1", null, "param1"),
+                    Arguments.of("code1", "", "param1"),
+                    Arguments.of("code1", "  ", "param1"),
+                    Arguments.of("code1", "lang1", null),
+                    Arguments.of("code1", "lang1", ""),
+                    Arguments.of("code1", "lang1", "   ")
+            )
+        }
+
+        @JvmStatic
+        private fun provideInvalidConfig(): Stream<Arguments> {
+            return Stream.of(
+                    Arguments.of(FeatureSetGenerationConfig(setOf("unknown"), setOf(), 0.0, 1.0)),
+                    Arguments.of(FeatureSetGenerationConfig(setOf("code1", "code2"), setOf(), 0.0, 1.0)),
+                    Arguments.of(FeatureSetGenerationConfig(setOf(), setOf("code3"), 0.0, 1.0)),
+                    Arguments.of(FeatureSetGenerationConfig(setOf("code1"), setOf("code1"), 0.0, 1.0)),
+                    Arguments.of(FeatureSetGenerationConfig(setOf(), setOf("unknown"), 0.0, 1.0)),
+                    Arguments.of(FeatureSetGenerationConfig(setOf(), setOf(), -0.1, 1.0)),
+                    Arguments.of(FeatureSetGenerationConfig(setOf(), setOf(), 0.0, 1.1)),
+                    Arguments.of(FeatureSetGenerationConfig(setOf(), setOf(), 0.7, 0.5))
+            )
+        }
+
+        @JvmStatic
+        private fun provideValidConfigAndExpectedResult(): Stream<Arguments> {
+            return Stream.of(
+                    Arguments.of(
+                            FeatureSetGenerationConfig(setOf(), setOf(), 0.0, 1.0),
+                            setOf("code3", "code1")
+                    ),
+                    Arguments.of(
+                            FeatureSetGenerationConfig(setOf("code2"), setOf(), 0.0, 1.0),
+                            setOf("code2", "code3")
+                    ),
+                    Arguments.of(
+                            FeatureSetGenerationConfig(setOf(), setOf("code1"), 0.0, 1.0),
+                            setOf("code2", "code3")
+                    )
             )
         }
     }

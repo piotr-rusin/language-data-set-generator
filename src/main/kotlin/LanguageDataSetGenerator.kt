@@ -67,17 +67,21 @@ class FeatureSetGenerator(values: List<Value>) {
                 .map { it.first }
     }
 
-    fun generateFeatureSet(random: Random): Set<String> {
-        val selectedValueIds = mutableSetOf<String>()
-        val parameterIdToValueIdListForRandomChoice = mutableMapOf<String, List<String>>()
-        this.parameterIdsByCount.forEach {
+    fun generateFeatureSet(config: FeatureSetGenerationConfig, random: Random): Set<String> {
+        validateConfig(config)
+        val selectedValueIds = config.preselectedValueIds.toMutableSet()
+        val parameterIdToValueIdListForRandomChoice = mutableMapOf<String, Set<String>>()
+        val paramIdsForPreselectedValues = parameterIdToCodeIds.filter { it.value.intersect(config.preselectedValueIds).isNotEmpty() }.keys
+        val missingParameters = parameterIdsByCount.filter { it !in paramIdsForPreselectedValues }
+        missingParameters.forEach {
             // probably impossible to happen due to all parameter and parameter value ids ultimately coming from data provided in values
-            val nextParamValueIds = parameterIdToCodeIds[it] ?: error("Couldn't find value ids for parameter id $it")
+            val nextParamValueIds = (parameterIdToCodeIds[it] ?: error("Couldn't find value ids for parameter id $it"))
+                    .filter { value -> value !in config.excludedValueIds  }.toSet()
             val availableValues = nextParamValueIds.filter { codeId ->
                 selectedValueIds.any { selected ->
                     // same as above
                     val prob = probabilities[selected]?.get(codeId) ?: error("Couldn't find probability for $codeId and $selected")
-                    prob in 0.0..1.0
+                    prob in config.minProbability..config.maxProbability
                 }
             }
             var nextValue: String? = null
@@ -93,5 +97,39 @@ class FeatureSetGenerator(values: List<Value>) {
         parameterIdToValueIdListForRandomChoice.forEach { selectedValueIds.add(it.value.random(random)) }
 
         return selectedValueIds
+    }
+
+    private fun validateConfig(config: FeatureSetGenerationConfig) {
+        if (parameterIdToCodeIds.any { it.value.intersect(config.preselectedValueIds).size > 1 }) {
+            error("Each preselected value must belong to a different parameter")
+        }
+
+        if (parameterIdToCodeIds.any { config.excludedValueIds.containsAll(it.value)}) {
+            error("Excluded values must not contain all values for any parameter")
+        }
+
+        if (!codeIdToLanguageId.keys.containsAll(config.preselectedValueIds)) {
+            error("Preselected value ids contain ids of unknown values")
+        }
+
+        if (!codeIdToLanguageId.keys.containsAll(config.excludedValueIds)) {
+            error("Excluded value ids contain ids of unknown values")
+        }
+
+        if (config.excludedValueIds.intersect(config.preselectedValueIds).isNotEmpty()){
+            error("Excluded value ids must not be also preselected")
+        }
+
+        if (config.minProbability < 0.0) {
+            error("Minimal probability cannot be less than 0.0")
+        }
+
+        if (config.maxProbability > 1.0) {
+            error("Max probability cannot be more than 1.0")
+        }
+
+        if (config.minProbability > config.maxProbability) {
+            error("Min probability cannot be larger than max probability")
+        }
     }
 }

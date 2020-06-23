@@ -65,16 +65,16 @@ class FeatureSetGenerator(values: List<Value>) {
                 .map { it.first }
     }
 
-    fun generateFeatureSet(random: Random): Map<String, String> {
-        val paramIdToSelectedValueId = mutableMapOf<String, String>()
+    fun generateFeatureSet(random: Random): Set<String> {
+        val selectedValueIds = mutableSetOf<String>()
         val parameterIdToValueIdListForRandomChoice = mutableMapOf<String, List<String>>()
         this.parameterIdsByCount.forEach {
             // probably impossible to happen due to all parameter and parameter value ids ultimately coming from data provided in values
             val nextParamValueIds = parameterIdToCodeIds[it] ?: error("Couldn't find value ids for parameter id $it")
             val availableValues = nextParamValueIds.filter { codeId ->
-                paramIdToSelectedValueId.any {entry ->
+                selectedValueIds.any { selected ->
                     // same as above
-                    val prob = probabilities[entry.value]?.get(codeId) ?: error("Couldn't find probability for $codeId and ${entry.value}")
+                    val prob = probabilities[selected]?.get(codeId) ?: error("Couldn't find probability for $codeId and $selected")
                     prob in 0.0..1.0
                 }
             }
@@ -85,11 +85,11 @@ class FeatureSetGenerator(values: List<Value>) {
             if (nextValue == null) {
                 parameterIdToValueIdListForRandomChoice[it] = nextParamValueIds
             } else {
-                paramIdToSelectedValueId[it] = nextValue
+                selectedValueIds.add(nextValue)
             }
         }
-        parameterIdToValueIdListForRandomChoice.forEach { paramIdToSelectedValueId[it.key] = it.value.random(random) }
+        parameterIdToValueIdListForRandomChoice.forEach { selectedValueIds.add(it.value.random(random)) }
 
-        return paramIdToSelectedValueId
+        return selectedValueIds
     }
 }

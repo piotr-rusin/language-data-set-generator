@@ -78,7 +78,7 @@ class LanguageDataSetGeneratorTests {
         val generator = FeatureSetGenerator(values)
 
         val actual = generator.generateFeatureSet(randomMock)
-        val expected = mapOf<String, String>("param2" to "code3", "param1" to "code1")
+        val expected = setOf("code3", "code1")
 
         Assertions.assertThat(actual).isEqualTo(expected)
     }

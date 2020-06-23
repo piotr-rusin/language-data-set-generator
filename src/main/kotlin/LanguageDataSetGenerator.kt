@@ -33,6 +33,8 @@ fun getProbabilitiesOfOccurenceOfDependentFeatures(codeIdToLanguageIdMap: Map<St
     return probabilitiesOfCooccurrence
 }
 
+data class FeatureSetGenerationConfig(val preselectedValueIds: Set<String>, val excludedValueIds: Set<String>, val minProbability: Double, val maxProbability: Double)
+
 class FeatureSetGenerator(values: List<Value>) {
     private var parameterIdsByCount: List<String>
     private var parameterIdToCodeIds: Map<String, List<String>>

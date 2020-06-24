@@ -2,6 +2,15 @@
 package com.github.rtwnt.language_data_set_generator
 
 import com.github.rtwnt.language_data.row.Value
+import io.ktor.application.*
+import io.ktor.features.ContentNegotiation
+import io.ktor.gson.gson
+import io.ktor.http.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import java.text.DateFormat
 import kotlin.random.Random
 
 fun getCodeIdToLanguageIdMap(values: List<Value>): Map<String, Set<String>> {
@@ -130,6 +139,34 @@ class FeatureSetGenerator(values: List<Value>) {
 
         if (config.minProbability > config.maxProbability) {
             error("Min probability cannot be larger than max probability")
+        }
+    }
+}
+
+fun main(args: Array<String>) {
+    val env = applicationEngineEnvironment {
+        module {
+            main(args)
+        }
+        connector {
+            host = "0.0.0.0"
+            port = 8080
+        }
+    }
+
+    embeddedServer(Netty, env).start()
+}
+
+fun Application.main(args: Array<String>) {
+    install(ContentNegotiation) {
+        gson {
+            setDateFormat(DateFormat.LONG)
+            setPrettyPrinting()
+        }
+    }
+    install(Routing) {
+        get("/") {
+            call.respondText("Language generator test", ContentType.Text.Plain)
         }
     }
 }

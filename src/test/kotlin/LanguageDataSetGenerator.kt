@@ -1,7 +1,7 @@
 package com.github.rtwnt.language_data_set_generator
 
-import com.github.rtwnt.language_data.row.Code
-import com.github.rtwnt.language_data.row.Value
+import com.github.rtwnt.language_data.row.Code as CodeRow
+import com.github.rtwnt.language_data.row.Value as ValueRow
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -15,15 +15,15 @@ class LanguageDataSetGeneratorTests {
 
     private var increment = 0
 
-    private fun prepareCodeMock(): Code {
-        val code = Mockito.mock(Code::class.java)
+    private fun prepareCodeMock(): CodeRow {
+        val code = Mockito.mock(CodeRow::class.java)
         increment += 1
         Mockito.`when`(code.parameterId).thenReturn("parameter$increment")
         return code
     }
 
-    private fun prepareValueMock(codeId: String?, languageId: String?, parameterId: String?): Value {
-        val value = Mockito.mock(Value::class.java)
+    private fun prepareValueMock(codeId: String?, languageId: String?, parameterId: String?): ValueRow {
+        val value = Mockito.mock(ValueRow::class.java)
         Mockito.`when`(value.codeId).thenReturn(codeId)
         Mockito.`when`(value.languageId).thenReturn(languageId)
         Mockito.`when`(value.parameterId).thenReturn(parameterId)

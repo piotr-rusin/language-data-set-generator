@@ -1,7 +1,7 @@
 
 package com.github.rtwnt.language_data_set_generator
 
-import com.github.rtwnt.language_data.row.Value
+import com.github.rtwnt.language_data.row.Value as ValueRow
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
@@ -13,7 +13,7 @@ import io.ktor.server.netty.*
 import java.text.DateFormat
 import kotlin.random.Random
 
-fun getCodeIdToLanguageIdMap(values: List<Value>): Map<String, Set<String>> {
+fun getCodeIdToLanguageIdMap(values: List<ValueRow>): Map<String, Set<String>> {
     return values.groupBy { it.codeId }
             .entries
             .associate { it.key to it.value.map { value -> value.languageId }.toSet() }
@@ -44,7 +44,7 @@ fun getProbabilitiesOfOccurenceOfDependentFeatures(codeIdToLanguageIdMap: Map<St
 
 data class FeatureSetGenerationConfig(val preselectedValueIds: Set<String>, val excludedValueIds: Set<String>, val minProbability: Double, val maxProbability: Double)
 
-class FeatureSetGenerator(values: List<Value>) {
+class FeatureSetGenerator(values: List<ValueRow>) {
     private var parameterIdsByCount: List<String>
     private var parameterIdToCodeIds: Map<String, Set<String>>
     private var probabilities: Map<String, Map<String, Double>>

@@ -1,7 +1,10 @@
 
 package com.github.rtwnt.language_data_set_generator
 
+import com.github.rtwnt.language_data.row.Code as CodeRow
+import com.github.rtwnt.language_data.row.Parameter as ParameterRow
 import com.github.rtwnt.language_data.row.Value as ValueRow
+import com.github.rtwnt.language_data.row.Language as LanguageRow
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
@@ -139,6 +142,54 @@ class FeatureSetGenerator(values: List<ValueRow>) {
 
         if (config.minProbability > config.maxProbability) {
             error("Min probability cannot be larger than max probability")
+        }
+    }
+}
+
+class Feature(val name: String, val area: String) {
+    companion object {
+        fun readAllFromFile(path: String): Map<String, Feature> {
+            return ParameterRow.readAllFromFile(path).mapValues { Feature(it.value.name, it.value.area) }
+        }
+    }
+}
+
+class FeatureValue(val name: String, val feature: Feature) {
+    companion object {
+        fun readAllFromFiles(featureValuePath: String, featurePath: String): Map<String, FeatureValue> {
+            val features = Feature.readAllFromFile(featurePath)
+            return CodeRow.readAllFromFile(featureValuePath).mapValues {
+                FeatureValue(
+                        it.value.name,
+                        features[it.value.parameterId] ?: error("Couldn't find feature with id = ${it.value.parameterId}")
+                )
+            }
+        }
+    }
+}
+
+class Language(val name: String, val features: Set<FeatureValue>) {
+    companion object {
+        fun readAllFromFiles(
+                languagePath: String,
+                valuePath: String,
+                featureValuePath: String,
+                featurePath: String
+        ) {
+            val featureValues = FeatureValue.readAllFromFiles(featureValuePath, featurePath)
+            val valueRows = ValueRow.readAllFromFile(valuePath)
+
+            LanguageRow.readAllFromFile(languagePath).mapValues {
+                Language(
+                        it.value.name,
+                        valueRows.values.filter { v -> v.languageId == v.id }
+                                .map { v ->
+                                    featureValues[v.codeId] ?:
+                                    error("Couldn't find a feature value for id = ${v.codeId} and value row id = ${v.id}")
+                                }
+                                .toSet()
+                )
+            }
         }
     }
 }

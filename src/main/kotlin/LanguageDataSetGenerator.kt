@@ -146,6 +146,7 @@ class FeatureSetGenerator(values: List<ValueRow>) {
 
 
 const val NAME_KEY = "Name"
+const val FAMILY_KEY = "Family"
 const val AREA_KEY = "Area"
 const val ID_KEY = "ID"
 const val PARAMETER_ID_KEY = "Parameter_ID"
@@ -198,7 +199,7 @@ class FeatureValue(val name: String, val feature: Feature) {
     }
 }
 
-data class Language(val name: String, val featureValues: List<FeatureValue>){
+data class Language(val name: String, val family: String, val featureValues: List<FeatureValue>){
 
     constructor(
             languageData: Map<String, String>,
@@ -206,6 +207,7 @@ data class Language(val name: String, val featureValues: List<FeatureValue>){
             featureIdToFeatureValue: Map<String, FeatureValue>):
             this(
                     languageData[NAME_KEY] ?: error("Missing $NAME_KEY in $languageData"),
+                    languageData[FAMILY_KEY] ?: error("Missing $FAMILY_KEY in $languageData"),
                     languageFeatureValueRelationshipData.filter {
                         it[LANGUAGE_ID_KEY] == languageData[ID_KEY] ?: error("Missing $ID_KEY in $languageData")
                     }.map {

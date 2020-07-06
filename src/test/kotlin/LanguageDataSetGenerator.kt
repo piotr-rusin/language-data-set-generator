@@ -193,7 +193,7 @@ class DataModelTests {
                                     PARAMETER_ID_KEY to "param1"
                             ),
                             mapOf(
-                                    "param1" to Feature("featureName", "featureArea")
+                                    "param1" to Feature("f1", "featureName", "featureArea")
                             )
                     ),
                     Arguments.of(
@@ -221,10 +221,10 @@ class DataModelTests {
     @Test
     fun `FeatureValue constructor returns expected value`() {
         val actual = FeatureValue(
-                mapOf(NAME_KEY to "name1", PARAMETER_ID_KEY to "param1"),
-                mapOf("param1" to Feature("featureName", "featureArea"))
+                mapOf(ID_KEY to "fv1", NAME_KEY to "name1", PARAMETER_ID_KEY to "param1"),
+                mapOf("param1" to Feature("f1", "featureName", "featureArea"))
         )
-        val expected = FeatureValue("name1", Feature("featureName", "featureArea"))
+        val expected = FeatureValue("fv1", "name1", Feature("f1", "featureName", "featureArea"))
         Assertions.assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected)
     }
 }

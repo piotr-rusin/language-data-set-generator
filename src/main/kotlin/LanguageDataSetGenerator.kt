@@ -158,10 +158,11 @@ fun <K, V> Map<K, V>.getOrIllegalState(key: K): V {
 }
 
 
-data class Feature(val name: String, val area: String) {
+data class Feature(val id: String, val name: String, val area: String) {
 
     constructor(data: Map<String, String>):
         this(
+                data.getOrIllegalState(ID_KEY),
                 data.getOrIllegalState(NAME_KEY),
                 data.getOrIllegalState(AREA_KEY)
         )
@@ -179,8 +180,9 @@ data class Feature(val name: String, val area: String) {
 }
 
 
-data class FeatureValue(val name: String, val feature: Feature) {
+data class FeatureValue(val id: String, val name: String, val feature: Feature) {
     constructor(featureValueData: Map<String, String>, featureIdToFeature: Map<String, Feature>): this(
+            featureValueData.getOrIllegalState(ID_KEY),
             featureValueData.getOrIllegalState(NAME_KEY),
             featureIdToFeature.getOrIllegalState(featureValueData.getOrIllegalState(PARAMETER_ID_KEY))
     )
@@ -199,13 +201,14 @@ data class FeatureValue(val name: String, val feature: Feature) {
     }
 }
 
-data class Language(val name: String, val family: String, val featureValues: List<FeatureValue>){
+data class Language(val id: String, val name: String, val family: String, val featureValues: List<FeatureValue>){
 
     constructor(
             languageData: Map<String, String>,
             languageFeatureValueRelationshipData: List<Map<String, String>>,
             featureValueIdToFeatureValue: Map<String, FeatureValue>):
             this(
+                    languageData.getOrIllegalState(ID_KEY),
                     languageData.getOrIllegalState(NAME_KEY),
                     languageData.getOrIllegalState(FAMILY_KEY),
                     languageFeatureValueRelationshipData.filter {

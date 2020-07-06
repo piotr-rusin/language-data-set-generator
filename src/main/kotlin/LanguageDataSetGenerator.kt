@@ -204,14 +204,14 @@ data class Language(val name: String, val family: String, val featureValues: Lis
     constructor(
             languageData: Map<String, String>,
             languageFeatureValueRelationshipData: List<Map<String, String>>,
-            featureIdToFeatureValue: Map<String, FeatureValue>):
+            featureValueIdToFeatureValue: Map<String, FeatureValue>):
             this(
                     languageData[NAME_KEY] ?: error("Missing $NAME_KEY in $languageData"),
                     languageData[FAMILY_KEY] ?: error("Missing $FAMILY_KEY in $languageData"),
                     languageFeatureValueRelationshipData.filter {
                         it[LANGUAGE_ID_KEY] == languageData[ID_KEY] ?: error("Missing $ID_KEY in $languageData")
                     }.map {
-                        featureIdToFeatureValue[
+                        featureValueIdToFeatureValue[
                                 it[CODE_ID_KEY] ?: error("Missing $CODE_ID_KEY in $it")
                         ] ?: error("Feature value not found for id ${it[CODE_ID_KEY]}")
                     }

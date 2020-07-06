@@ -160,3 +160,71 @@ class LanguageDataSetGeneratorTests {
         Assertions.assertThatThrownBy { FeatureSetGenerator(values) }.isInstanceOf(IllegalStateException::class.java)
     }
 }
+
+class DataModelTests {
+    companion object {
+        @JvmStatic
+        private fun provideInvalidArgumentsForFeatureConstructor(): Stream<Arguments> {
+            return Stream.of(
+                    Arguments.of(
+                            mapOf(
+                                    "Name" to "test1"
+                            )
+                    ),
+                    Arguments.of(
+                            mapOf(
+                                    "Area" to "test"
+                            )
+                    )
+            )
+        }
+
+        @JvmStatic
+        private fun provideInvalidArgumentsForFeatureValueConstructor(): Stream<Arguments> {
+            return Stream.of(
+                    Arguments.of(
+                            mapOf(
+                                    "Name" to "test1"
+                            ),
+                            mapOf<String, Feature>()
+                    ),
+                    Arguments.of(
+                            mapOf(
+                                    "Parameter_ID" to "param1"
+                            ),
+                            mapOf(
+                                    "param1" to Feature("featureName", "featureArea")
+                            )
+                    ),
+                    Arguments.of(
+                            mapOf(
+                                    "Name" to "test1",
+                                    "Parameter_ID" to "param1"
+                            ),
+                            mapOf<String, Feature>()
+                    )
+            )
+        }
+    }
+    @ParameterizedTest
+    @MethodSource("provideInvalidArgumentsForFeatureConstructor")
+    fun `Feature constructor throws error on missing data`(data: Map<String, String>) {
+        Assertions.assertThatThrownBy { Feature(data) }.isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidArgumentsForFeatureValueConstructor")
+    fun `FeatureValue constructor throws error on missing data`(featureData: Map<String, String>, availableFeatures: Map<String, Feature>) {
+        Assertions.assertThatThrownBy { FeatureValue(featureData, availableFeatures) }.isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `FeatureValue constructor returns expected value`() {
+        val actual = FeatureValue(
+                mapOf("Name" to "name1", "Parameter_ID" to "param1"),
+                mapOf("param1" to Feature("featureName", "featureArea"))
+        )
+        val expected = FeatureValue("name1", Feature("featureName", "featureArea"))
+        Assertions.assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected)
+    }
+}

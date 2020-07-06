@@ -1,10 +1,8 @@
 
 package com.github.rtwnt.language_data_set_generator
 
-import com.github.rtwnt.language_data.row.Code as CodeRow
-import com.github.rtwnt.language_data.row.Parameter as ParameterRow
+import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.rtwnt.language_data.row.Value as ValueRow
-import com.github.rtwnt.language_data.row.Language as LanguageRow
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
@@ -147,49 +145,84 @@ class FeatureSetGenerator(values: List<ValueRow>) {
 }
 
 class Feature(val name: String, val area: String) {
+
+    constructor(data: Map<String, String>):
+        this(
+                data["Name"] ?: error("Missing Name value in $data"),
+                data["Area"] ?: error("Missing Area value in $data")
+        )
+
     companion object {
         fun readAllFromFile(path: String): Map<String, Feature> {
-            return ParameterRow.readAllFromFile(path).mapValues { Feature(it.value.name, it.value.area) }
+            val result = mutableMapOf<String, Feature>()
+            csvReader().open(path) {
+                readAllWithHeaderAsSequence().forEach {
+                    result[it["ID"] ?: error("Missing ID")] = Feature(it)
+                }
+            }
+
+            return result
         }
     }
 }
+
 
 class FeatureValue(val name: String, val feature: Feature) {
+    constructor(featureValueData: Map<String, String>, featureIdToFeature: Map<String, Feature>): this(
+            featureValueData["Name"] ?: error("Missing name of a feature value"),
+            featureIdToFeature[
+                    featureValueData["Parameter_ID"] ?: error("Missing Parameter_ID value in $featureValueData")
+            ] ?: error("Couldn't find a feature with id = ${featureValueData["Parameter_ID"]}")
+    )
+
+
     companion object {
-        fun readAllFromFiles(featureValuePath: String, featurePath: String): Map<String, FeatureValue> {
+        fun readFromFiles(featureValuePath: String, featurePath: String): Map<String, FeatureValue> {
             val features = Feature.readAllFromFile(featurePath)
-            return CodeRow.readAllFromFile(featureValuePath).mapValues {
-                FeatureValue(
-                        it.value.name,
-                        features[it.value.parameterId] ?: error("Couldn't find feature with id = ${it.value.parameterId}")
-                )
+            val result = mutableMapOf<String, FeatureValue>()
+            csvReader().open(featureValuePath) {
+                readAllWithHeaderAsSequence().forEach { result[it["ID"] ?: error("Missing ID")] = FeatureValue(it, features) }
             }
+
+            return result
         }
     }
 }
 
-class Language(val name: String, val features: Set<FeatureValue>) {
-    companion object {
-        fun readAllFromFiles(
-                languagePath: String,
-                valuePath: String,
-                featureValuePath: String,
-                featurePath: String
-        ) {
-            val featureValues = FeatureValue.readAllFromFiles(featureValuePath, featurePath)
-            val valueRows = ValueRow.readAllFromFile(valuePath)
+data class Language(val name: String, val featureValues: List<FeatureValue>){
 
-            LanguageRow.readAllFromFile(languagePath).mapValues {
-                Language(
-                        it.value.name,
-                        valueRows.values.filter { v -> v.languageId == v.id }
-                                .map { v ->
-                                    featureValues[v.codeId] ?:
-                                    error("Couldn't find a feature value for id = ${v.codeId} and value row id = ${v.id}")
-                                }
-                                .toSet()
-                )
+    constructor(
+            languageData: Map<String, String>,
+            languageFeatureValueRelationshipData: List<Map<String, String>>,
+            featureIdToFeatureValue: Map<String, FeatureValue>):
+            this(
+                    languageData["Name"] ?: error("Name not provided"),
+                    languageFeatureValueRelationshipData.filter {
+                        it["Language_ID"] == languageData["ID"] ?: error("Missing ID in $languageData")
+                    }.map {
+                        featureIdToFeatureValue[
+                                it["Code_ID"] ?: error("Missing Code_ID in $it")
+                        ] ?: error("Feature value not found for id ${it["Code_ID"]}")
+                    }
+            )
+
+    companion object {
+        fun readFromFiles(
+            languagePath: String,
+            valuePath: String,
+            featureValues: Map<String, FeatureValue>
+        ): Map<String, Language> {
+            val valueRows = mutableListOf<Map<String, String>>()
+            csvReader().open(valuePath) {
+                readAllWithHeaderAsSequence().forEach { valueRows.add(it) }
             }
+            val result = mutableMapOf<String, Language>()
+            csvReader().open(languagePath) {
+                readAllWithHeaderAsSequence().forEach {
+                    result[it["ID"] ?: error("Missing ID")] = Language(it, valueRows, featureValues)
+                }
+            }
+            return result
         }
     }
 }

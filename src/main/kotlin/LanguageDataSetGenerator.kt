@@ -11,6 +11,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import java.io.File
 import java.text.DateFormat
 import kotlin.random.Random
 
@@ -169,12 +170,9 @@ data class Feature(val id: String, val name: String, val area: String) {
 
     companion object {
         fun readAllFromFile(path: String): Map<String, Feature> {
-            val result = mutableMapOf<String, Feature>()
-            csvReader().open(path) {
-                readAllWithHeaderAsSequence().forEach { result[it.getOrIllegalState(ID_KEY)] = Feature(it) }
-            }
-
-            return result
+            return csvReader().readAllWithHeader(File(path))
+                    .map { Feature(it) }
+                    .associateBy { it.id }
         }
     }
 }
@@ -191,12 +189,9 @@ data class FeatureValue(val id: String, val name: String, val feature: Feature) 
     companion object {
         fun readFromFiles(featureValuePath: String, featurePath: String): Map<String, FeatureValue> {
             val features = Feature.readAllFromFile(featurePath)
-            val result = mutableMapOf<String, FeatureValue>()
-            csvReader().open(featureValuePath) {
-                readAllWithHeaderAsSequence().forEach { result[it.getOrIllegalState(ID_KEY)] = FeatureValue(it, features) }
-            }
-
-            return result
+            return csvReader().readAllWithHeader(File(featureValuePath))
+                    .map { FeatureValue(it, features) }
+                    .associateBy { it.id }
         }
     }
 }

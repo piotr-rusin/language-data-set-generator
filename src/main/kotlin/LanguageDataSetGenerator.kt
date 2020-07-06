@@ -198,19 +198,12 @@ data class FeatureValue(val id: String, val name: String, val feature: Feature) 
 
 data class Language(val id: String, val name: String, val family: String, val featureValues: List<FeatureValue>){
 
-    constructor(
-            languageData: Map<String, String>,
-            languageFeatureValueRelationshipData: List<Map<String, String>>,
-            featureValueIdToFeatureValue: Map<String, FeatureValue>):
+    constructor(languageData: Map<String, String>, languageIdToFeatureValues: Map<String, List<FeatureValue>>):
             this(
                     languageData.getOrIllegalState(ID_KEY),
                     languageData.getOrIllegalState(NAME_KEY),
                     languageData.getOrIllegalState(FAMILY_KEY),
-                    languageFeatureValueRelationshipData.filter {
-                        it.getOrIllegalState(LANGUAGE_ID_KEY) == languageData.getOrIllegalState(ID_KEY)
-                    }.map {
-                        featureValueIdToFeatureValue.getOrIllegalState(it.getOrIllegalState(CODE_ID_KEY))
-                    }
+                    languageIdToFeatureValues.getOrIllegalState(languageData.getOrIllegalState(ID_KEY))
             )
 
     companion object {
@@ -219,17 +212,15 @@ data class Language(val id: String, val name: String, val family: String, val fe
             valuePath: String,
             featureValues: Map<String, FeatureValue>
         ): Map<String, Language> {
-            val valueRows = mutableListOf<Map<String, String>>()
-            csvReader().open(valuePath) {
-                readAllWithHeaderAsSequence().forEach { valueRows.add(it) }
-            }
-            val result = mutableMapOf<String, Language>()
-            csvReader().open(languagePath) {
-                readAllWithHeaderAsSequence().forEach {
-                    result[it.getOrIllegalState(ID_KEY)] = Language(it, valueRows, featureValues)
-                }
-            }
-            return result
+            val valueRows = csvReader().readAllWithHeader(File(valuePath))
+            val languageIdToFeatureValues = valueRows.groupBy(
+                    { it.getOrIllegalState(LANGUAGE_ID_KEY) },
+                    { featureValues.getOrIllegalState(it.getOrIllegalState(CODE_ID_KEY)) }
+            )
+
+            return csvReader().readAllWithHeader(File(languagePath))
+                    .map { Language(it, languageIdToFeatureValues) }
+                    .associateBy { it.id }
         }
     }
 }

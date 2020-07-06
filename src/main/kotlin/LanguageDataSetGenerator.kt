@@ -153,6 +153,8 @@ const val ID_KEY = "ID"
 const val PARAMETER_ID_KEY = "Parameter_ID"
 const val LANGUAGE_ID_KEY = "Language_ID"
 const val CODE_ID_KEY = "Code_ID"
+const val MACROAREA_KEY = "macroarea"
+const val ASCII_NAME_KEY = "ascii_name"
 
 fun <K, V> Map<K, V>.getOrIllegalState(key: K): V {
     return this[key] ?: error("Missing $key value in $this")
@@ -196,7 +198,7 @@ data class FeatureValue(val id: String, val name: String, val feature: Feature) 
     }
 }
 
-data class Language(val id: String, val name: String, val family: String, val featureValues: List<FeatureValue>){
+data class Language(val id: String, val name: String, val family: String, val macroarea: String, val featureValues: List<FeatureValue>){
 
     init {
         if (featureValues.isEmpty()) {
@@ -204,17 +206,19 @@ data class Language(val id: String, val name: String, val family: String, val fe
         }
     }
 
-    constructor(languageData: Map<String, String>, languageIdToFeatureValues: Map<String, List<FeatureValue>>):
+    constructor(languageData: Map<String, String>, walsLanguageData: Map<String, String>, languageIdToFeatureValues: Map<String, List<FeatureValue>>):
             this(
                     languageData.getOrIllegalState(ID_KEY),
                     languageData.getOrIllegalState(NAME_KEY),
                     languageData.getOrIllegalState(FAMILY_KEY),
+                    walsLanguageData.getOrIllegalState(MACROAREA_KEY),
                     languageIdToFeatureValues.getOrIllegalState(languageData.getOrIllegalState(ID_KEY))
             )
 
     companion object {
         fun readFromFiles(
             languagePath: String,
+            walsLanguagePath: String,
             valuePath: String,
             featureValues: Map<String, FeatureValue>
         ): Map<String, Language> {
@@ -223,10 +227,20 @@ data class Language(val id: String, val name: String, val family: String, val fe
                     { it.getOrIllegalState(LANGUAGE_ID_KEY) },
                     { featureValues.getOrIllegalState(it.getOrIllegalState(CODE_ID_KEY)) }
             )
+            val walsLanguageData = csvReader().readAllWithHeader(File(walsLanguagePath))
+                    .associateBy { it.getOrIllegalState(ASCII_NAME_KEY).toLowerCase() }
 
             return csvReader().readAllWithHeader(File(languagePath))
-                    .filter { languageIdToFeatureValues.containsKey(it.getOrIllegalState(ID_KEY)) }
-                    .map { Language(it, languageIdToFeatureValues) }
+                    .filter {
+                        languageIdToFeatureValues.containsKey(it.getOrIllegalState(ID_KEY))
+                                && walsLanguageData.containsKey(it.getOrIllegalState(NAME_KEY).toLowerCase())
+                                && walsLanguageData.getOrIllegalState(it.getOrIllegalState(NAME_KEY).toLowerCase())
+                                .getOrIllegalState(MACROAREA_KEY).isNotBlank()
+                    }.map { Language(
+                            it,
+                            walsLanguageData.getOrIllegalState(it.getOrIllegalState(NAME_KEY).toLowerCase()),
+                            languageIdToFeatureValues)
+                    }
                     .associateBy { it.id }
         }
     }

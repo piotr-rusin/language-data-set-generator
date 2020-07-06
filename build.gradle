@@ -27,6 +27,7 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:1.2.3"
     implementation "io.ktor:ktor-server-core:$ktor_version"
     implementation "io.ktor:ktor-gson:$ktor_version"
+    implementation 'com.github.doyaaaaaken:kotlin-csv-jvm:0.10.4'
     testImplementation "io.ktor:ktor-server-tests:$ktor_version"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.1'
     testImplementation 'org.assertj:assertj-core:3.11.1'

@@ -198,6 +198,12 @@ data class FeatureValue(val id: String, val name: String, val feature: Feature) 
 
 data class Language(val id: String, val name: String, val family: String, val featureValues: List<FeatureValue>){
 
+    init {
+        if (featureValues.isEmpty()) {
+            error("No feature values provided for $this")
+        }
+    }
+
     constructor(languageData: Map<String, String>, languageIdToFeatureValues: Map<String, List<FeatureValue>>):
             this(
                     languageData.getOrIllegalState(ID_KEY),

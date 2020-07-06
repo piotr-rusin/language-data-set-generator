@@ -225,6 +225,7 @@ data class Language(val id: String, val name: String, val family: String, val fe
             )
 
             return csvReader().readAllWithHeader(File(languagePath))
+                    .filter { languageIdToFeatureValues.containsKey(it.getOrIllegalState(ID_KEY)) }
                     .map { Language(it, languageIdToFeatureValues) }
                     .associateBy { it.id }
         }

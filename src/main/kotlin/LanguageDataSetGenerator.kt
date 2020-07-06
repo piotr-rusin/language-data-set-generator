@@ -153,22 +153,24 @@ const val PARAMETER_ID_KEY = "Parameter_ID"
 const val LANGUAGE_ID_KEY = "Language_ID"
 const val CODE_ID_KEY = "Code_ID"
 
+fun <K, V> Map<K, V>.getOrIllegalState(key: K): V {
+    return this[key] ?: error("Missing $key value in $this")
+}
+
 
 data class Feature(val name: String, val area: String) {
 
     constructor(data: Map<String, String>):
         this(
-                data[NAME_KEY] ?: error("Missing $NAME_KEY value in $data"),
-                data[AREA_KEY] ?: error("Missing $AREA_KEY value in $data")
+                data.getOrIllegalState(NAME_KEY),
+                data.getOrIllegalState(AREA_KEY)
         )
 
     companion object {
         fun readAllFromFile(path: String): Map<String, Feature> {
             val result = mutableMapOf<String, Feature>()
             csvReader().open(path) {
-                readAllWithHeaderAsSequence().forEach {
-                    result[it[ID_KEY] ?: error("Missing $ID_KEY in $it")] = Feature(it)
-                }
+                readAllWithHeaderAsSequence().forEach { result[it.getOrIllegalState(ID_KEY)] = Feature(it) }
             }
 
             return result
@@ -179,10 +181,8 @@ data class Feature(val name: String, val area: String) {
 
 data class FeatureValue(val name: String, val feature: Feature) {
     constructor(featureValueData: Map<String, String>, featureIdToFeature: Map<String, Feature>): this(
-            featureValueData[NAME_KEY] ?: error("Missing $NAME_KEY in $featureValueData"),
-            featureIdToFeature[
-                    featureValueData[PARAMETER_ID_KEY] ?: error("Missing $PARAMETER_ID_KEY value in $featureValueData")
-            ] ?: error("Couldn't find a feature with id = ${featureValueData[PARAMETER_ID_KEY]}")
+            featureValueData.getOrIllegalState(NAME_KEY),
+            featureIdToFeature.getOrIllegalState(featureValueData.getOrIllegalState(PARAMETER_ID_KEY))
     )
 
 
@@ -191,7 +191,7 @@ data class FeatureValue(val name: String, val feature: Feature) {
             val features = Feature.readAllFromFile(featurePath)
             val result = mutableMapOf<String, FeatureValue>()
             csvReader().open(featureValuePath) {
-                readAllWithHeaderAsSequence().forEach { result[it[ID_KEY] ?: error("Missing $ID_KEY in $it")] = FeatureValue(it, features) }
+                readAllWithHeaderAsSequence().forEach { result[it.getOrIllegalState(ID_KEY)] = FeatureValue(it, features) }
             }
 
             return result
@@ -206,14 +206,12 @@ data class Language(val name: String, val family: String, val featureValues: Lis
             languageFeatureValueRelationshipData: List<Map<String, String>>,
             featureValueIdToFeatureValue: Map<String, FeatureValue>):
             this(
-                    languageData[NAME_KEY] ?: error("Missing $NAME_KEY in $languageData"),
-                    languageData[FAMILY_KEY] ?: error("Missing $FAMILY_KEY in $languageData"),
+                    languageData.getOrIllegalState(NAME_KEY),
+                    languageData.getOrIllegalState(FAMILY_KEY),
                     languageFeatureValueRelationshipData.filter {
-                        it[LANGUAGE_ID_KEY] == languageData[ID_KEY] ?: error("Missing $ID_KEY in $languageData")
+                        it.getOrIllegalState(LANGUAGE_ID_KEY) == languageData.getOrIllegalState(ID_KEY)
                     }.map {
-                        featureValueIdToFeatureValue[
-                                it[CODE_ID_KEY] ?: error("Missing $CODE_ID_KEY in $it")
-                        ] ?: error("Feature value not found for id ${it[CODE_ID_KEY]}")
+                        featureValueIdToFeatureValue.getOrIllegalState(it.getOrIllegalState(CODE_ID_KEY))
                     }
             )
 
@@ -230,7 +228,7 @@ data class Language(val name: String, val family: String, val featureValues: Lis
             val result = mutableMapOf<String, Language>()
             csvReader().open(languagePath) {
                 readAllWithHeaderAsSequence().forEach {
-                    result[it[ID_KEY] ?: error("Missing $ID_KEY in $it")] = Language(it, valueRows, featureValues)
+                    result[it.getOrIllegalState(ID_KEY)] = Language(it, valueRows, featureValues)
                 }
             }
             return result

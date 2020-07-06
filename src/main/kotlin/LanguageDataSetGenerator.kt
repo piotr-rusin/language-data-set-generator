@@ -154,7 +154,7 @@ const val LANGUAGE_ID_KEY = "Language_ID"
 const val CODE_ID_KEY = "Code_ID"
 
 
-class Feature(val name: String, val area: String) {
+data class Feature(val name: String, val area: String) {
 
     constructor(data: Map<String, String>):
         this(
@@ -177,7 +177,7 @@ class Feature(val name: String, val area: String) {
 }
 
 
-class FeatureValue(val name: String, val feature: Feature) {
+data class FeatureValue(val name: String, val feature: Feature) {
     constructor(featureValueData: Map<String, String>, featureIdToFeature: Map<String, Feature>): this(
             featureValueData[NAME_KEY] ?: error("Missing $NAME_KEY in $featureValueData"),
             featureIdToFeature[

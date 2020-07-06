@@ -144,12 +144,21 @@ class FeatureSetGenerator(values: List<ValueRow>) {
     }
 }
 
+
+const val NAME_KEY = "Name"
+const val AREA_KEY = "Area"
+const val ID_KEY = "ID"
+const val PARAMETER_ID_KEY = "Parameter_ID"
+const val LANGUAGE_ID_KEY = "Language_ID"
+const val CODE_ID_KEY = "Code_ID"
+
+
 class Feature(val name: String, val area: String) {
 
     constructor(data: Map<String, String>):
         this(
-                data["Name"] ?: error("Missing Name value in $data"),
-                data["Area"] ?: error("Missing Area value in $data")
+                data[NAME_KEY] ?: error("Missing $NAME_KEY value in $data"),
+                data[AREA_KEY] ?: error("Missing $AREA_KEY value in $data")
         )
 
     companion object {
@@ -157,7 +166,7 @@ class Feature(val name: String, val area: String) {
             val result = mutableMapOf<String, Feature>()
             csvReader().open(path) {
                 readAllWithHeaderAsSequence().forEach {
-                    result[it["ID"] ?: error("Missing ID")] = Feature(it)
+                    result[it[ID_KEY] ?: error("Missing $ID_KEY in $it")] = Feature(it)
                 }
             }
 
@@ -169,10 +178,10 @@ class Feature(val name: String, val area: String) {
 
 class FeatureValue(val name: String, val feature: Feature) {
     constructor(featureValueData: Map<String, String>, featureIdToFeature: Map<String, Feature>): this(
-            featureValueData["Name"] ?: error("Missing name of a feature value"),
+            featureValueData[NAME_KEY] ?: error("Missing $NAME_KEY in $featureValueData"),
             featureIdToFeature[
-                    featureValueData["Parameter_ID"] ?: error("Missing Parameter_ID value in $featureValueData")
-            ] ?: error("Couldn't find a feature with id = ${featureValueData["Parameter_ID"]}")
+                    featureValueData[PARAMETER_ID_KEY] ?: error("Missing $PARAMETER_ID_KEY value in $featureValueData")
+            ] ?: error("Couldn't find a feature with id = ${featureValueData[PARAMETER_ID_KEY]}")
     )
 
 
@@ -181,7 +190,7 @@ class FeatureValue(val name: String, val feature: Feature) {
             val features = Feature.readAllFromFile(featurePath)
             val result = mutableMapOf<String, FeatureValue>()
             csvReader().open(featureValuePath) {
-                readAllWithHeaderAsSequence().forEach { result[it["ID"] ?: error("Missing ID")] = FeatureValue(it, features) }
+                readAllWithHeaderAsSequence().forEach { result[it[ID_KEY] ?: error("Missing $ID_KEY in $it")] = FeatureValue(it, features) }
             }
 
             return result
@@ -196,13 +205,13 @@ data class Language(val name: String, val featureValues: List<FeatureValue>){
             languageFeatureValueRelationshipData: List<Map<String, String>>,
             featureIdToFeatureValue: Map<String, FeatureValue>):
             this(
-                    languageData["Name"] ?: error("Name not provided"),
+                    languageData[NAME_KEY] ?: error("Missing $NAME_KEY in $languageData"),
                     languageFeatureValueRelationshipData.filter {
-                        it["Language_ID"] == languageData["ID"] ?: error("Missing ID in $languageData")
+                        it[LANGUAGE_ID_KEY] == languageData[ID_KEY] ?: error("Missing $ID_KEY in $languageData")
                     }.map {
                         featureIdToFeatureValue[
-                                it["Code_ID"] ?: error("Missing Code_ID in $it")
-                        ] ?: error("Feature value not found for id ${it["Code_ID"]}")
+                                it[CODE_ID_KEY] ?: error("Missing $CODE_ID_KEY in $it")
+                        ] ?: error("Feature value not found for id ${it[CODE_ID_KEY]}")
                     }
             )
 
@@ -219,7 +228,7 @@ data class Language(val name: String, val featureValues: List<FeatureValue>){
             val result = mutableMapOf<String, Language>()
             csvReader().open(languagePath) {
                 readAllWithHeaderAsSequence().forEach {
-                    result[it["ID"] ?: error("Missing ID")] = Language(it, valueRows, featureValues)
+                    result[it[ID_KEY] ?: error("Missing $ID_KEY in $it")] = Language(it, valueRows, featureValues)
                 }
             }
             return result

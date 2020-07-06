@@ -168,12 +168,12 @@ class DataModelTests {
             return Stream.of(
                     Arguments.of(
                             mapOf(
-                                    "Name" to "test1"
+                                    NAME_KEY to "test1"
                             )
                     ),
                     Arguments.of(
                             mapOf(
-                                    "Area" to "test"
+                                    AREA_KEY to "test"
                             )
                     )
             )
@@ -184,13 +184,13 @@ class DataModelTests {
             return Stream.of(
                     Arguments.of(
                             mapOf(
-                                    "Name" to "test1"
+                                    NAME_KEY to "test1"
                             ),
                             mapOf<String, Feature>()
                     ),
                     Arguments.of(
                             mapOf(
-                                    "Parameter_ID" to "param1"
+                                    PARAMETER_ID_KEY to "param1"
                             ),
                             mapOf(
                                     "param1" to Feature("featureName", "featureArea")
@@ -198,8 +198,8 @@ class DataModelTests {
                     ),
                     Arguments.of(
                             mapOf(
-                                    "Name" to "test1",
-                                    "Parameter_ID" to "param1"
+                                    NAME_KEY to "test1",
+                                    PARAMETER_ID_KEY to "param1"
                             ),
                             mapOf<String, Feature>()
                     )
@@ -221,7 +221,7 @@ class DataModelTests {
     @Test
     fun `FeatureValue constructor returns expected value`() {
         val actual = FeatureValue(
-                mapOf("Name" to "name1", "Parameter_ID" to "param1"),
+                mapOf(NAME_KEY to "name1", PARAMETER_ID_KEY to "param1"),
                 mapOf("param1" to Feature("featureName", "featureArea"))
         )
         val expected = FeatureValue("name1", Feature("featureName", "featureArea"))

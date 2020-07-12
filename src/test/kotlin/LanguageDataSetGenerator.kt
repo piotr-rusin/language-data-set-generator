@@ -227,4 +227,47 @@ class DataModelTests {
         val expected = FeatureValue("fv1", "name1", Feature("f1", "featureName", "featureArea"))
         Assertions.assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected)
     }
+
+    @Test
+    fun `Feature readAllFromFile correctly reads data`() {
+        val features = Feature.readAllFromFile("src/main/resources/wals/cldf/parameters.csv")
+        val actual = features["1A"]
+        val expected = Feature("1A", "Consonant Inventories", "Phonology")
+        Assertions.assertThat(actual).isEqualTo(expected)
+    }
+
+    private fun featureValueReadFromFiles(): Map<String, FeatureValue> {
+        return FeatureValue.readFromFiles(
+                "src/main/resources/wals/cldf/codes.csv",
+                "src/main/resources/wals/cldf/parameters.csv"
+        )
+    }
+
+    @Test
+    fun `FeatureValue readFromFiles correctly reads data`() {
+        val values = featureValueReadFromFiles()
+        val actual = values["1A-2"]
+        val expected = FeatureValue("1A-2", "Moderately small", Feature("1A", "Consonant Inventories", "Phonology"))
+        Assertions.assertThat(actual).isEqualTo(expected)
+    }
+
+    @Test
+    fun `Language readFromFiles correctly reads data`() {
+        val featureValues = featureValueReadFromFiles()
+        val languages = Language.readFromFiles(
+                "src/main/resources/wals/cldf/languages.csv",
+                "src/main/resources/wals/raw/walslanguage.csv",
+                "src/main/resources/wals/cldf/values.csv",
+                featureValues
+        )
+        val actual = languages["amm"]
+        val expected = Language(
+                "amm",
+                "Ama",
+                "Left May",
+                "Papunesia",
+                featureValues.filter { it.key in setOf("86A-1", "87A-3", "97A-5") }.values.toList()
+        )
+        Assertions.assertThat(actual).isEqualTo(expected)
+    }
 }

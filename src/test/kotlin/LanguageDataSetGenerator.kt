@@ -178,54 +178,11 @@ class DataModelTests {
                     )
             )
         }
-
-        @JvmStatic
-        private fun provideInvalidArgumentsForFeatureValueConstructor(): Stream<Arguments> {
-            return Stream.of(
-                    Arguments.of(
-                            mapOf(
-                                    NAME_KEY to "test1"
-                            ),
-                            mapOf<String, Feature>()
-                    ),
-                    Arguments.of(
-                            mapOf(
-                                    PARAMETER_ID_KEY to "param1"
-                            ),
-                            mapOf(
-                                    "param1" to Feature("f1", "featureName", "featureArea")
-                            )
-                    ),
-                    Arguments.of(
-                            mapOf(
-                                    NAME_KEY to "test1",
-                                    PARAMETER_ID_KEY to "param1"
-                            ),
-                            mapOf<String, Feature>()
-                    )
-            )
-        }
     }
     @ParameterizedTest
     @MethodSource("provideInvalidArgumentsForFeatureConstructor")
     fun `Feature constructor throws error on missing data`(data: Map<String, String>) {
         Assertions.assertThatThrownBy { Feature(data) }.isInstanceOf(IllegalStateException::class.java)
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideInvalidArgumentsForFeatureValueConstructor")
-    fun `FeatureValue constructor throws error on missing data`(featureData: Map<String, String>, availableFeatures: Map<String, Feature>) {
-        Assertions.assertThatThrownBy { FeatureValue(featureData, availableFeatures) }.isInstanceOf(IllegalStateException::class.java)
-    }
-
-    @Test
-    fun `FeatureValue constructor returns expected value`() {
-        val actual = FeatureValue(
-                mapOf(ID_KEY to "fv1", NAME_KEY to "name1", PARAMETER_ID_KEY to "param1"),
-                mapOf("param1" to Feature("f1", "featureName", "featureArea"))
-        )
-        val expected = FeatureValue("fv1", "name1", Feature("f1", "featureName", "featureArea"))
-        Assertions.assertThat(actual).isEqualToComparingFieldByFieldRecursively(expected)
     }
 
     @Test

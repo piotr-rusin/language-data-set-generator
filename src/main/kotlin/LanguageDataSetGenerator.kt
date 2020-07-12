@@ -181,19 +181,17 @@ data class Feature(val id: String, val name: String, val area: String) {
 
 
 data class FeatureValue(val id: String, val name: String, val feature: Feature) {
-    constructor(featureValueData: Map<String, String>, featureIdToFeature: Map<String, Feature>): this(
-            featureValueData.getOrIllegalState(ID_KEY),
-            featureValueData.getOrIllegalState(NAME_KEY),
-            featureIdToFeature.getOrIllegalState(featureValueData.getOrIllegalState(PARAMETER_ID_KEY))
-    )
-
-
     companion object {
         fun readFromFiles(featureValuePath: String, featurePath: String): Map<String, FeatureValue> {
             val features = Feature.readAllFromFile(featurePath)
             return csvReader().readAllWithHeader(File(featureValuePath))
-                    .map { FeatureValue(it, features) }
-                    .associateBy { it.id }
+                    .map {
+                        FeatureValue(
+                                it.getValue(ID_KEY),
+                                it.getValue(NAME_KEY),
+                                features.getValue(it.getValue(PARAMETER_ID_KEY))
+                        )
+                    }.associateBy { it.id }
         }
     }
 }

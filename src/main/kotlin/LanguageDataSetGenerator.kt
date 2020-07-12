@@ -200,15 +200,6 @@ data class FeatureValue(val id: String, val name: String, val feature: Feature) 
 
 data class Language(val id: String, val name: String, val family: String, val macroarea: String?, val featureValues: List<FeatureValue>){
 
-    constructor(languageData: Map<String, String>, walsLanguageData: Map<String, String>, languageIdToFeatureValues: Map<String, List<FeatureValue>>):
-            this(
-                    languageData.getOrIllegalState(ID_KEY),
-                    languageData.getOrIllegalState(NAME_KEY),
-                    languageData.getOrIllegalState(FAMILY_KEY),
-                    walsLanguageData.getOrIllegalState(MACROAREA_KEY),
-                    languageIdToFeatureValues.getOrIllegalState(languageData.getOrIllegalState(ID_KEY))
-            )
-
     companion object {
         fun readFromFiles(
             languagePath: String,

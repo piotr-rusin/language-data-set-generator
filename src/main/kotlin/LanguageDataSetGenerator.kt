@@ -198,7 +198,7 @@ data class FeatureValue(val id: String, val name: String, val feature: Feature) 
     }
 }
 
-data class Language(val id: String, val name: String, val family: String, val macroarea: String, val featureValues: List<FeatureValue>){
+data class Language(val id: String, val name: String, val family: String, val macroarea: String?, val featureValues: List<FeatureValue>){
 
     init {
         if (featureValues.isEmpty()) {

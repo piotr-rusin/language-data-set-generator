@@ -162,19 +162,16 @@ fun <K, V> Map<K, V>.getOrIllegalState(key: K): V {
 
 
 data class Feature(val id: String, val name: String, val area: String) {
-
-    constructor(data: Map<String, String>):
-        this(
-                data.getOrIllegalState(ID_KEY),
-                data.getOrIllegalState(NAME_KEY),
-                data.getOrIllegalState(AREA_KEY)
-        )
-
     companion object {
         fun readAllFromFile(path: String): Map<String, Feature> {
             return csvReader().readAllWithHeader(File(path))
-                    .map { Feature(it) }
-                    .associateBy { it.id }
+                    .map {
+                        Feature(
+                                it.getValue(ID_KEY),
+                                it.getValue(NAME_KEY),
+                                it.getValue(AREA_KEY)
+                        )
+                    }.associateBy { it.id }
         }
     }
 }

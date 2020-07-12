@@ -162,29 +162,6 @@ class LanguageDataSetGeneratorTests {
 }
 
 class DataModelTests {
-    companion object {
-        @JvmStatic
-        private fun provideInvalidArgumentsForFeatureConstructor(): Stream<Arguments> {
-            return Stream.of(
-                    Arguments.of(
-                            mapOf(
-                                    NAME_KEY to "test1"
-                            )
-                    ),
-                    Arguments.of(
-                            mapOf(
-                                    AREA_KEY to "test"
-                            )
-                    )
-            )
-        }
-    }
-    @ParameterizedTest
-    @MethodSource("provideInvalidArgumentsForFeatureConstructor")
-    fun `Feature constructor throws error on missing data`(data: Map<String, String>) {
-        Assertions.assertThatThrownBy { Feature(data) }.isInstanceOf(IllegalStateException::class.java)
-    }
-
     @Test
     fun `Feature readAllFromFile correctly reads data`() {
         val features = Feature.readAllFromFile("src/main/resources/wals/cldf/parameters.csv")

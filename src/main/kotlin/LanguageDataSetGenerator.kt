@@ -156,11 +156,6 @@ const val CODE_ID_KEY = "Code_ID"
 const val MACROAREA_KEY = "macroarea"
 const val ASCII_NAME_KEY = "ascii_name"
 
-fun <K, V> Map<K, V>.getOrIllegalState(key: K): V {
-    return this[key] ?: error("Missing $key value in $this")
-}
-
-
 data class Feature(val id: String, val name: String, val area: String) {
     companion object {
         fun readAllFromFile(path: String): Map<String, Feature> {

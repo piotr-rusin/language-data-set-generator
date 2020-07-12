@@ -218,22 +218,21 @@ data class Language(val id: String, val name: String, val family: String, val ma
         ): Map<String, Language> {
             val valueRows = csvReader().readAllWithHeader(File(valuePath))
             val languageIdToFeatureValues = valueRows.groupBy(
-                    { it.getOrIllegalState(LANGUAGE_ID_KEY) },
-                    { featureValues.getOrIllegalState(it.getOrIllegalState(CODE_ID_KEY)) }
+                    { it.getValue(LANGUAGE_ID_KEY) },
+                    { featureValues.getValue(it.getValue(CODE_ID_KEY)) }
             )
             val walsLanguageData = csvReader().readAllWithHeader(File(walsLanguagePath))
-                    .associateBy { it.getOrIllegalState(ASCII_NAME_KEY).toLowerCase() }
+                    .associateBy { it.getValue(ASCII_NAME_KEY).toLowerCase() }
 
             return csvReader().readAllWithHeader(File(languagePath))
-                    .filter {
-                        languageIdToFeatureValues.containsKey(it.getOrIllegalState(ID_KEY))
-                                && walsLanguageData.containsKey(it.getOrIllegalState(NAME_KEY).toLowerCase())
-                                && walsLanguageData.getOrIllegalState(it.getOrIllegalState(NAME_KEY).toLowerCase())
-                                .getOrIllegalState(MACROAREA_KEY).isNotBlank()
-                    }.map { Language(
-                            it,
-                            walsLanguageData.getOrIllegalState(it.getOrIllegalState(NAME_KEY).toLowerCase()),
-                            languageIdToFeatureValues)
+                    .map {
+                        Language(
+                                it.getValue(ID_KEY),
+                                it.getValue(NAME_KEY),
+                                it.getValue(FAMILY_KEY),
+                                walsLanguageData[it.getValue(NAME_KEY).toLowerCase()]?.getValue(MACROAREA_KEY),
+                                languageIdToFeatureValues.getOrDefault(it.getValue(ID_KEY), listOf())
+                        )
                     }
                     .associateBy { it.id }
         }

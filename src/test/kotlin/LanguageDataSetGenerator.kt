@@ -165,8 +165,8 @@ class DataModelTests {
     @Test
     fun `Feature readAllFromFile correctly reads data`() {
         val features = Feature.readAllFromFile("src/main/resources/wals/cldf/parameters.csv")
-        val actual = features["1A"]
-        val expected = Feature("1A", "Consonant Inventories", "Phonology")
+        val actual = features["20A"]
+        val expected = Feature("20A", "Fusion of Selected Inflectional Formatives", "Morphology", listOf(features.getValue("83A")))
         Assertions.assertThat(actual).isEqualTo(expected)
     }
 
@@ -181,7 +181,7 @@ class DataModelTests {
     fun `FeatureValue readFromFiles correctly reads data`() {
         val values = featureValueReadFromFiles()
         val actual = values["1A-2"]
-        val expected = FeatureValue("1A-2", "Moderately small", Feature("1A", "Consonant Inventories", "Phonology"))
+        val expected = FeatureValue("1A-2", "Moderately small", Feature("1A", "Consonant Inventories", "Phonology", listOf()))
         Assertions.assertThat(actual).isEqualTo(expected)
     }
 

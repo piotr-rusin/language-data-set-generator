@@ -155,18 +155,47 @@ const val LANGUAGE_ID_KEY = "Language_ID"
 const val CODE_ID_KEY = "Code_ID"
 const val MACROAREA_KEY = "macroarea"
 const val ASCII_NAME_KEY = "ascii_name"
+const val INFLUENCED_BY_KEY = "Influenced_By"
 
-data class Feature(val id: String, val name: String, val area: String) {
+data class Feature(val id: String, val name: String, val area: String, val influencedBy: Collection<Feature>) {
     companion object {
+        private val alreadyCreated = mutableMapOf<String, Feature>()
+
         fun readAllFromFile(path: String): Map<String, Feature> {
-            return csvReader().readAllWithHeader(File(path))
-                    .map {
-                        Feature(
-                                it.getValue(ID_KEY),
-                                it.getValue(NAME_KEY),
-                                it.getValue(AREA_KEY)
-                        )
-                    }.associateBy { it.id }
+            alreadyCreated.clear()
+            val featureData = csvReader().readAllWithHeader(File(path)).associateBy { it.getValue(ID_KEY) }
+            featureData.forEach {
+                if (it.key !in alreadyCreated) {
+                    alreadyCreated[it.key] = createFeatureFrom(it.key, featureData, mutableListOf())
+                }
+            }
+            return alreadyCreated
+        }
+
+        private fun createFeatureFrom(
+                id: String,
+                featureData: Map<String, Map<String, String>>,
+                dependencyChain: MutableList<String>): Feature {
+            if (id in dependencyChain) {
+                dependencyChain.add(id)
+                val cycle = dependencyChain.subList(dependencyChain.indexOfFirst { it == id }, dependencyChain.size)
+                error("Detected a circular dependency ${ cycle.joinToString(separator = " -> ") }")
+            }
+
+            dependencyChain.add(id)
+
+            val currentFeatureData = featureData.getValue(id)
+            val affectedBy = currentFeatureData.getValue(INFLUENCED_BY_KEY)
+                    .split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() }
+                    .map { alreadyCreated.getOrPut(it, { createFeatureFrom(it, featureData, dependencyChain.toMutableList()) }) }
+            return Feature(
+                    currentFeatureData.getValue(ID_KEY),
+                    currentFeatureData.getValue(NAME_KEY),
+                    currentFeatureData.getValue(AREA_KEY),
+                    affectedBy
+            )
         }
     }
 }

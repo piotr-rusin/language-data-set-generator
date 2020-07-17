@@ -264,6 +264,8 @@ fun main(args: Array<String>) {
         }
     }
     ConfigFactory.defaultApplication()
+    val dbConfig = DatabaseConfig()
+    dbConfig.initConnection()
     embeddedServer(Netty, env).start()
 }
 

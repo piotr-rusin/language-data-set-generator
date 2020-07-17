@@ -21,7 +21,7 @@ fun main() {
 
     transaction {
         addLogger(StdOutSqlLogger)
-        SchemaUtils.create(FeatureAreas, Features, FeatureValues, LanguageFamilies,
-            Macroareas, LanguageFeatureValues, Languages)
+        SchemaUtils.create(FeatureAreas, FeatureInfluencingFeatures, Features,
+            FeatureValues, LanguageFamilies, Macroareas, LanguageFeatureValues, Languages)
     }
 }

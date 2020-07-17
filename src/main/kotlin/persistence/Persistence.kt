@@ -16,6 +16,11 @@ class FeatureArea(id: EntityID<Int>) : IntEntity(id) {
 }
 
 
+object FeatureInfluencingFeatures : Table("feature_influencing_feature_map") {
+    val feature = reference("feature", Features)
+    val influencingFeature = reference("influencing_feature", Features)
+    override val primaryKey = PrimaryKey(feature, influencingFeature)
+}
 object Features : IntIdTable() {
     val walsId = varchar("wals_id", 4).uniqueIndex()
     val name = varchar("name", 104).uniqueIndex()
@@ -26,7 +31,7 @@ class Feature(id: EntityID<Int>) : IntEntity(id) {
     var walsId by Features.walsId
     var name by Features.name
     var area by FeatureArea referencedOn Features.area
-    val influencedBy by Feature referrersOn Features.id
+    val influencedBy by Feature via FeatureInfluencingFeatures
     val values by FeatureValue referrersOn FeatureValues.feature
 }
 

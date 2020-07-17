@@ -263,7 +263,7 @@ fun main(args: Array<String>) {
             port = 8080
         }
     }
-
+    ConfigFactory.defaultApplication()
     embeddedServer(Netty, env).start()
 }
 

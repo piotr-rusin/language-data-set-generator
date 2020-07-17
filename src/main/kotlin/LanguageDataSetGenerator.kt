@@ -2,6 +2,8 @@
 package com.github.rtwnt.language_data_set_generator
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import com.github.rtwnt.language_data.row.Value as ValueRow
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
@@ -11,6 +13,8 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.sql.Database
 import java.io.File
 import java.text.DateFormat
 import kotlin.random.Random
@@ -261,6 +265,25 @@ fun main(args: Array<String>) {
     }
 
     embeddedServer(Netty, env).start()
+}
+
+class DatabaseConfig(dbConfig: Config = ConfigFactory.load().getConfig("database")) {
+    private val driver: String = dbConfig.getString("driver")
+    private val url: String = dbConfig.getString("url")
+    private val user: String = dbConfig.getString("user")
+    private val password: String = dbConfig.getString("password")
+
+    fun initConnection() {
+        Database.connect(url, driver, user, password)
+    }
+
+    fun executeMigrationScripts() {
+        val flyway = Flyway.configure()
+            .dataSource(url, user, password)
+            .locations("db/migration")
+            .load()
+        flyway.migrate()
+    }
 }
 
 fun Application.main(args: Array<String>) {

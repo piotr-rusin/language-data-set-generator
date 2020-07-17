@@ -266,6 +266,7 @@ fun main(args: Array<String>) {
     ConfigFactory.defaultApplication()
     val dbConfig = DatabaseConfig()
     dbConfig.initConnection()
+    dbConfig.executeMigrationScripts()
     embeddedServer(Netty, env).start()
 }
 

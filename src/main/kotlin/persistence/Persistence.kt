@@ -27,6 +27,7 @@ class Feature(id: EntityID<Int>) : IntEntity(id) {
     var name by Features.name
     var area by FeatureArea referencedOn Features.area
     val influencedBy by Feature referrersOn Features.id
+    val values by FeatureValue referrersOn FeatureValues.feature
 }
 
 

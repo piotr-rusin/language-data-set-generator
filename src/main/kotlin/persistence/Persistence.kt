@@ -38,7 +38,7 @@ class Feature(id: EntityID<Int>) : IntEntity(id) {
 
 object FeatureValues : IntIdTable("feature_values") {
     val walsId = varchar("wals_id", 7).uniqueIndex()
-    val name = varchar("name", 94).uniqueIndex()
+    val name = varchar("name", 94)
     val feature = reference("feature", Features).index()
 }
 class FeatureValue(id: EntityID<Int>) : IntEntity(id) {

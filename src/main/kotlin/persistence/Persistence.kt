@@ -63,7 +63,7 @@ object Macroareas : IntIdTable() {
 }
 class Macroarea(id: EntityID<Int>): IntEntity(id) {
     companion object : IntEntityClass<Macroarea>(Macroareas)
-    var name by LanguageFamilies.name
+    var name by Macroareas.name
 }
 
 

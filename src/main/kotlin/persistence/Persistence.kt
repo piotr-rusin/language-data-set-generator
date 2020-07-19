@@ -31,8 +31,8 @@ class Feature(id: EntityID<Int>) : IntEntity(id) {
     var walsId by Features.walsId
     var name by Features.name
     var area by FeatureArea referencedOn Features.area
-    val influencedBy by Feature via FeatureInfluencingFeatures
     val values by FeatureValue referrersOn FeatureValues.feature
+    var influencingFeatures by Feature.via(FeatureInfluencingFeatures.feature, FeatureInfluencingFeatures.influencingFeature)
 }
 
 

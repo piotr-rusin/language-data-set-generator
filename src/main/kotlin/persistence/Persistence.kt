@@ -76,13 +76,13 @@ object Languages : IntIdTable() {
     val walsId = varchar("wals_id", 3).uniqueIndex()
     val name = varchar("name", 46).uniqueIndex()
     val family = reference("family", LanguageFamilies).index()
-    val macroarea = reference("macroarea", Macroareas).index()
+    val macroarea = reference("macroarea", Macroareas).nullable().index()
 }
 class Language(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Language>(Languages)
     var walsId by Languages.walsId
     var name by Languages.name
     var family by LanguageFamily referencedOn Languages.family
-    var macroarea by Macroarea referencedOn Languages.macroarea
+    var macroarea by Macroarea optionalReferencedOn Languages.macroarea
     var featureValues by FeatureValue via LanguageFeatureValues
 }

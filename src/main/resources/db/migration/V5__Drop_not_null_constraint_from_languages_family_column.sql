@@ -1,0 +1,1 @@
+alter table languages alter column family drop not null;

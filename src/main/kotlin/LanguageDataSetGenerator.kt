@@ -263,18 +263,26 @@ fun main(args: Array<String>) {
             port = 8080
         }
     }
-    ConfigFactory.defaultApplication()
-    val dbConfig = DatabaseConfig()
+    val config = ConfigFactory.defaultApplication()
+    val dbConfig = DatabaseConfig(config)
     dbConfig.initConnection()
     dbConfig.executeMigrationScripts()
     embeddedServer(Netty, env).start()
 }
 
-class DatabaseConfig(dbConfig: Config = ConfigFactory.load().getConfig("database")) {
-    private val driver: String = dbConfig.getString("driver")
-    private val url: String = dbConfig.getString("url")
-    private val user: String = dbConfig.getString("user")
-    private val password: String = dbConfig.getString("password")
+class DatabaseConfig(config: Config) {
+    private val driver: String
+    private val url: String
+    private val user: String
+    private val password: String
+
+    init {
+        val dbConfig = config.getConfig("database")
+        driver = dbConfig.getString("driver")
+        url = dbConfig.getString("url")
+        user = dbConfig.getString("user")
+        password = dbConfig.getString("password")
+    }
 
     fun initConnection() {
         Database.connect(url, driver, user, password)

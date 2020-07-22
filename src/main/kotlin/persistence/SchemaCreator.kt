@@ -16,8 +16,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
  *
  */
 fun main() {
-    ConfigFactory.defaultApplication()
-    DatabaseConfig().initConnection()
+    val config = ConfigFactory.defaultApplication()
+    DatabaseConfig(config).initConnection()
 
     transaction {
         addLogger(StdOutSqlLogger)

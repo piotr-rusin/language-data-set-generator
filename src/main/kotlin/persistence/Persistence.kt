@@ -77,6 +77,7 @@ object Languages : IntIdTable() {
     val name = varchar("name", 46).uniqueIndex()
     val family = optReference("family", LanguageFamilies).index()
     val macroarea = reference("macroarea", Macroareas).nullable().index()
+    val isNatlang = bool("is_natlang").default(false).index()
 }
 class Language(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Language>(Languages)
@@ -85,4 +86,5 @@ class Language(id: EntityID<Int>) : IntEntity(id) {
     var family by LanguageFamily optionalReferencedOn Languages.family
     var macroarea by Macroarea optionalReferencedOn Languages.macroarea
     var featureValues by FeatureValue via LanguageFeatureValues
+    var isNatlang by Languages.isNatlang
 }

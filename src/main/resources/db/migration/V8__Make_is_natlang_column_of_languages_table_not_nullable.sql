@@ -1,0 +1,1 @@
+alter table languages alter column is_natlang set not null;

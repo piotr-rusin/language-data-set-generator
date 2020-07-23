@@ -63,6 +63,7 @@ private fun createLanguages(
             name = it.getValue(NAME_KEY)
             family = languageFamily
             macroarea = languageMacroarea
+            isNatlang = true
         }
     }.associateBy { it.walsId }
 }
@@ -124,10 +125,14 @@ fun readDataFromCsvResource(path: String): List<Map<String, String>> {
     return csvReader().readAllWithHeader(getResourceFile(path))
 }
 
+fun readLanguageDataFromCsv(): List<Map<String, String>> {
+    return readDataFromCsvResource("/wals/cldf/languages.csv")
+}
+
 fun importData() {
     val featureData = readDataFromCsvResource("/wals/cldf/parameters.csv")
     val featureValueData = readDataFromCsvResource("/wals/cldf/codes.csv")
-    val languageData = readDataFromCsvResource("/wals/cldf/languages.csv")
+    val languageData = readLanguageDataFromCsv()
     val walsLanguageData = readDataFromCsvResource("/wals/raw/walslanguage.csv")
         .associateBy { it.getValue(ASCII_NAME_KEY).toLowerCase() }
     val languageIdToFeatureValueId = readDataFromCsvResource("/wals/cldf/values.csv")

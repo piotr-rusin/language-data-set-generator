@@ -263,7 +263,7 @@ fun main(args: Array<String>) {
             port = 8080
         }
     }
-    val config = ConfigFactory.defaultApplication()
+    val config = ConfigFactory.load()
     val dbConfig = DatabaseConfig(config)
     dbConfig.initConnection()
     dbConfig.executeMigrationScripts()

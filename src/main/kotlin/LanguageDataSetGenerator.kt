@@ -291,7 +291,10 @@ class DatabaseConfig(config: Config) {
     fun executeMigrationScripts() {
         val flyway = Flyway.configure()
             .dataSource(url, user, password)
-            .locations("db/migration")
+            .locations(
+                "classpath:db/migration",
+                "classpath:com/github/rtwnt/language_data_set_generator/persistence/db/migration/"
+            )
             .load()
         flyway.migrate()
     }
